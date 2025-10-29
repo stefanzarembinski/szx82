@@ -1,0 +1,9 @@
+Metadata-Version: 2.1
+Name: szx82
+Version: 0.1
+Summary: Encoder-Decoder Transformer czy może się przydać?
+Home-page: https://github.com/stefanzarembinski/szx82
+Author: sz
+Author-email: stefan.zarenmbinski@gmail.com
+Requires-Python: >=3.10
+Description-Content-Type: text

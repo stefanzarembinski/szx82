@@ -1,0 +1,197 @@
+import numpy as np
+from tqdm import tqdm
+import timeit
+import torch
+from torch.optim import Adam
+
+class ScheduledOptim:
+    """A simple wrapper class for learning rate scheduling"""
+
+    def __init__(self, optimizer, lr, n_warmup_steps):
+        self._optimizer = optimizer
+        self.n_warmup_steps = n_warmup_steps
+        self.n_current_steps = 0
+        self.init_lr = lr
+
+    def step_and_update_lr(self):
+        "Step with the inner optimizer"
+        self._update_learning_rate()
+        self._optimizer.step()
+
+    def zero_grad(self):
+        "Zero out the gradients by the inner optimizer"
+        self._optimizer.zero_grad()
+
+    def _get_lr_scale(self):
+        return np.min(
+            [
+                np.power(self.n_current_steps, -0.5),
+                np.power(self.n_warmup_steps, -1.5) * self.n_current_steps,
+            ]
+        )
+
+    def _update_learning_rate(self):
+        """Learning rate scheduling per step"""
+
+        self.n_current_steps += 1
+        lr = self.init_lr * self._get_lr_scale()
+
+        for param_group in self._optimizer.param_groups:
+            param_group['lr'] = lr
+
+class ModelShell:
+    def __init__(
+        self,
+        train_dataloader,
+        val_dataloader,
+        ModelClass,
+        config,
+        lr=0.001,
+        weight_decay=0.0,
+        betas=(0.9, 0.999),
+        warmup_steps=10000,
+    ):
+        self.label = {'ModelClass': ModelClass}      
+        self.config = config
+        self.model_env = ModelClass(
+            config=config,
+            shell=self
+        )
+
+        self.train_dataloader = train_dataloader
+        self.val_dataloader = val_dataloader
+        self.transformer_shell = None
+        self.train_history = {
+            'train losses': [],
+            'train acc': [],
+            'val losses': [],
+            'val acc': [],
+        }
+        self.train_results = None # predictions vs target over epoch
+        self.val_results = None
+        
+        self.optimizer = Adam(
+            self.model_env.model.parameters(), 
+            lr=lr, betas=betas, 
+            weight_decay=weight_decay
+        )
+
+        self.optim_schedule = ScheduledOptim(
+            self.optimizer, 
+            lr=lr, 
+            n_warmup_steps=warmup_steps
+        )
+
+    def train(self):
+        start = timeit.default_timer()
+        train_loss = None
+        train_loss0 = None
+        
+        val_loss = None
+        val_loss0 = None
+        
+        best = None
+        best_thd = 1e-4 
+        ncols=80
+        train_acc = None
+        val_acc = None
+        self.model_env.transformer_shell = self.transformer_shell
+
+        epochs = tqdm(desc='epochs', ncols=ncols)
+        epochs.update(1)
+        first_epoch = True
+        
+        self.model_env.final_adj()
+
+        while True:
+            epochs.update(1)
+            if train_loss0 and val_loss0:
+                epochs.set_description(f'loss trn,val:{train_loss / train_loss0:4.2f},{val_loss / val_loss0:4.2f} best: { best:0.2f}')
+
+            self.model_env.model.train()
+            train_current = []
+            val_current = []            
+
+            train_running_loss = 0 
+            train_tqdm = tqdm(self.train_dataloader, leave=False, ncols=ncols)
+            val_tqdm = tqdm(self.val_dataloader, leave=False, ncols=ncols)
+
+            if self.transformer_shell is not None:
+                 if self.transformer_shell.key_pressed.key_pressed():
+                    break
+
+            if train_loss is not None:
+                train_tqdm.set_description(
+                                    f'train {train_acc["msg"]}')     
+                val_tqdm.set_description(f'val. {val_acc["msg"]}') 
+            
+            for idx, batch in enumerate(train_tqdm):
+                self.transformer_shell.key_pressed.read_key_pressed()
+
+                self.optimizer.zero_grad()
+                loss = self.model_env(batch)
+                train_current.append(self.model_env.current)
+                train_running_loss += loss.item()
+
+                if not first_epoch:
+                    loss.mean().backward()
+                    self.optimizer.step()                  
+            
+            train_loss = train_running_loss / (idx + 1) \
+                                            / self.train_dataloader.batch_size
+            if not train_loss0:
+                if not np.isnan(train_loss):
+                    train_loss0 = train_loss
+
+            self.train_history['train losses'].append(train_loss)
+            train_current = self.model_env.cumulate(train_current)
+            train_acc = self.model_env.accuracy(train_current)
+            self.train_history['train acc'].append(train_acc['acc'])
+            self.train_results = train_current
+
+            self.model_env.model.eval()
+            with torch.no_grad():
+                val_running_loss = 0               
+
+                for idx, batch in enumerate(val_tqdm):
+                    self.transformer_shell.key_pressed.read_key_pressed()
+                    
+                    loss = self.model_env(batch)
+                    val_current.append(self.model_env.current)
+                    val_running_loss += loss.item()           
+              
+            val_loss = val_running_loss / (idx + 1) \
+                                                / self.val_dataloader.batch_size
+            if not val_loss0:
+                if not np.isnan(val_loss):
+                    val_loss0 = val_loss
+
+            self.train_history['val losses'].append(val_loss)
+            val_current = self.model_env.cumulate(val_current)
+            val_acc = self.model_env.accuracy(val_current)
+            self.train_history['val acc'].append(val_acc['acc'])
+            self.val_results = val_current
+            
+            if best is None:
+                best = val_acc['best']
+            if (val_acc['best'] / (abs(best) + 1e-12) - 1) \
+                                                    > best_thd:
+                best = val_acc['best']
+                if self.transformer_shell is not None:
+                    self.transformer_shell.save_model(
+                        best=True,
+                        verbose=False)
+
+            first_epoch = False
+
+        stop = timeit.default_timer()
+        print(f"Training Time: {stop-start:.2f} s")
+    
+    def save_model(self, file_path):
+        self.model_env.set_results(self.train_results, self.val_results)
+        # if file_path is not None:     
+        #     with open(file_path, 'wb') as f:
+        #         pickle.dump(self.model_env.model, f)
+        # https://stackoverflow.com/questions/42703500/how-do-i-save-a-trained-model-in-pytorch
+        # A common PyTorch convention is to save tensors using .pt file extension.
+        self.model_env.model.save_pretrained(file_path)

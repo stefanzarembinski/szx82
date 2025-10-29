@@ -1,0 +1,6 @@
+README.txt
+setup.py
+szx82.egg-info/PKG-INFO
+szx82.egg-info/SOURCES.txt
+szx82.egg-info/dependency_links.txt
+szx82.egg-info/top_level.txt
