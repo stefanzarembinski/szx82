@@ -29,9 +29,19 @@ class KeyPressed:
             ],
             [ 
 
-            ]
+            ] 
         ]
 
+    def on_key_submit(self, key):
+        if key in [_[1] for _ in self.keys]:
+            self.key = key
+            print(f' Key "{self.key.decode()}" pressed, wait.')
+        else:
+            self.on_key_pressed_done
+
+    def on_key_pressed_done(self):
+        pass
+ 
     def key_pressed(self, locals=None):
         try:
             retval = False
@@ -64,6 +74,7 @@ class KeyPressed:
 
                 time.sleep(2)
             self.key = None
+            self.on_key_pressed_done()
             return False if retval is None or not retval else True
         except Exception as ex:
             print(f'''
@@ -74,60 +85,14 @@ Error message is
 ''')
     def read_key_pressed(self):
         if msvcrt.kbhit():
-                self.key = msvcrt.getch()
-                if self.key in [_[1] for _ in self.keys]:
+                key = msvcrt.getch()
+                if key in [_[1] for _ in self.keys]:
+                    self.key = key
                     print(f' Key "{self.key.decode()}" pressed, wait.')
 
-    def print_manu(self):
+    def print_menu(self):
         msg = '\n'
         for k in self.keys:
             msg += f'{k[0]}: {k[1].decode()}\n'
         print(msg)
-
-    def __init__(
-            self,
-            idxs,
-            forex_value,
-            futures,
-            direction, count, 
-            ):
-        self.idxs = idxs
-        self.value = forex_value
-        self.futures = futures
-        self.direction = direction
-        self.count = count
-        self.slider = None
-        self.val_plot = None
-
-        self.fig = plt.figure('Future', figsize=(6, 4), dpi=90,)
-        self.ax = self.fig.add_axes([0.1, 0.2, 0.9, 0.8]) 
-        plt.subplots_adjust(bottom=0.25)
-        plt.rcParams['toolbar'] = 'None'
-
-        self.update(None)
-        ax_slider = plt.axes([0.1, 0.1, 0.9, 0.03])
-        self.slider = Slider(
-             ax_slider, 'idxs', 0, len(idxs) - count, valinit=0)
-        self.slider.on_changed(self.update)
-        
-        self.fig.legend()
-        plt.show()
-
-    def update(self, val):
-        start = 0 if self.slider is None else int(self.slider.val)
-        stop = min(start + self.count, len(self.idxs))
-        idxs_ = self.idxs[start: stop]
-        value_ = self.value[start:stop]
-
-        if self.val_plot is not None:
-            self.ax.cla()
-
-        for k, v in self.futures.items():
-            mask = (v[start:stop] == self.direction)
-            self.ax.plot(idxs_[mask], value_[mask], 'o', ms=9,
-                        alpha=0.3, label=k)
-        self.val_plot, = self.ax.plot(
-            idxs_, value_, linewidth=0.5, label='forex')
-        self.ax.set_xlim(idxs_.min(), idxs_.max())
-        self.ax.set_ylim(
-                    value_.min() - 2e-4, value_.min() + 40e-4)               
+             

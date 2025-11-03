@@ -1,31 +1,44 @@
 import os
 from os import path
-import numpy as np
+import pickle
+from torch.utils.data import Dataset, DataLoader
 
-from torch.nn import CrossEntropyLoss
-from torch.utils.data import DataLoader
+from szx82.models.bert.pre.model import Config
+from szx82.models.model_shell import ModelShell
+from szx82.models.project_shell import ProjectShell
 
-import szx81.core.core_ as co
-from szx81.data_segments.data_segment import DataSegments
-from szx81.models.bert_rv.dataset import Data
-from szx81.models.bert_rv.dataset import Dataset
-from szx81.models.bert_rv.pre.model import Config
-from szx81.models.model_shell import ModelShell
-from szx81.models.project_shell import ProjectShell
+class Dataset(Dataset):
+    def __init__(
+                self,
+                data,
+    ):
+        super().__init__()
+        self.data = data
+        
+    def __len__(self):
+        return len(self.data)
+        
+    def __getitem__(self, index):
+        # print(self.data[index])
+        return self.data[index]
+    
+def data(data_file):
+    with open(data_file, "rb") as f:
+        data = pickle.load(f)
+    return data
 
 class Train:
     def __init__(
             self,
-            tokenizer_file,
-            prediction_file,
             file_name,
+            data_store,
+            data,
             model,         
             hidden_size=128,
-            intermediate_size=128,
-            num_hidden_layers=2,
+            intermediate_size=4 * 128, # 4 * hidden_size?
+            num_hidden_layers=6,
             num_attention_heads=2,
             dropout=0.5,
-            data_slice=(0, 100000), # (0.5, None)
             weight=None, 
             data_split={'train_val': 0.75, 'val_test': 0.25},
             batch_size=16,
@@ -33,9 +46,8 @@ class Train:
             criterion=None,
             lr=0.0004,
             ):
-        self.prediction_file = prediction_file
-        self.tokenizer_file = tokenizer_file
-        self.data_slice = data_slice
+        self.file_name = file_name
+        self.data_store = data_store
         
         self.model = model
         self.hidden_size = hidden_size
@@ -44,7 +56,7 @@ class Train:
         self.num_attention_heads = num_attention_heads
         self.dropout = dropout
         self.pretrained_path = pretrained_path
-        self.file_name = file_name        
+        self.data = data        
 
         self.weight = weight
         self.data_split = data_split
@@ -53,34 +65,24 @@ class Train:
         self.device = None
         self.lr = lr
 
-    def set_ts(self, device, name_prep=None):
+    def set_project_shell(self, device, name_prep=None):
         self.device = device
 
         if name_prep is not None:
             self.file_name += '_' + name_prep
-        store_dir = path.join(co.DATA_STORE, self.tokenizer_file)
         
-        try:
-            os.mkdir(store_dir)
-        except Exception as ex:
-            if not isinstance(ex, FileExistsError):
-                raise(ex)
+        train_dataset = Dataset(self.data['train_data'])
+        val_dataset = Dataset(self.data['val_data'])
+        parameters = self.data['parameters']
 
-        data_object = Data(
-                data_file_or_object=self.tokenizer_file, 
-                prediction_file=self.prediction_file,
-                ModelClass=self.model, 
-                data_split=self.data_split,
-                data_slice=self.data_slice,
-                )
         print(f'''
-train data size: {len(data_object.train_data)}
-validation data size: {len(data_object.val_data)}
-test data size: {len(data_object.test_data)}
-vocab hash: {data_object.vocab_hash}''')
+train data size: {len(train_dataset)}
+validation data size: {len(val_dataset)}
+test data size: {len(self.data['test_data'])}
+vocab hash: {parameters['vocab_hash']}''')
     
         self.config = Config(
-            vocab_size=data_object.tokenizer.vocab_size(),
+            vocab_size=parameters['vocab_size'],
             hidden_size=self.hidden_size, # Dimensionality of the encoder
             # layers and the pooler layer.
 
@@ -108,7 +110,7 @@ vocab hash: {data_object.vocab_hash}''')
             # (function or string) in the encoder and pooler.
             hidden_dropout_prob=self.dropout,
             attention_probs_dropout_prob=self.dropout,
-            max_position_embeddings=data_object.seq_len,
+            max_position_embeddings=parameters['seq_len'],
             type_vocab_size=2, # The vocabulary size of the `token_type_ids`
             initializer_range=0.02,
             layer_norm_eps=1e-12,
@@ -118,24 +120,21 @@ vocab hash: {data_object.vocab_hash}''')
             classifier_dropout=None,
 
             # hidden_dim=self.hidden_size, # nie ma tego. hidden_size
-            # num_labels=data_object.num_labels,
+            # num_labels=parameters.num_labels,
             # problem_type='single_label_classification',
 
             device=self.device,
             crit_weight=self.weight,
             criterion=self.criterion,
             # fix train-time vocab:                   
-            vocab=data_object.vocab_hash, 
+            vocab=parameters['vocab_hash'], 
             pretrained_path = self.pretrained_path
-                    )
-        
-        train_dataset = data_object.train_dataset
-        val_dataset = data_object.val_dataset
+        )
 
         model_shell = ModelShell(
                 train_dataloader=DataLoader(
                                     train_dataset,
-                                    batch_size=len(data_object.train_dataset) \
+                                    batch_size=len(train_dataset) \
                                         if self.batch_size is None \
                                             else self.batch_size, 
                                     shuffle=True, 
@@ -144,7 +143,7 @@ vocab hash: {data_object.vocab_hash}''')
                                 ),
                 val_dataloader=DataLoader(
                                     val_dataset,
-                                    batch_size=len(data_object.val_dataset) \
+                                    batch_size=len(val_dataset) \
                                         if self.batch_size is None \
                                             else self.batch_size, 
                                     shuffle=False, 
@@ -156,22 +155,23 @@ vocab hash: {data_object.vocab_hash}''')
                 lr=self.lr,        
         )
             
-        self.ts = ProjectShell(
-                        data_object=data_object,
-                        model_shell=model_shell,
-                        labels=[],
-                        store_dir=store_dir,
-                        file_name=self.file_name,
-                    )
+        self.project_shell = ProjectShell(
+                model_shell=model_shell,
+                store_dir=path.join(
+                    self.data_store, parameters['data_file_name']),
+                file_name=self.file_name,
+            )
 
-    def train(self, device, name_prep=None):
-        self.set_ts(device, name_prep)
-        self.ts.file_exists() 
-        self.ts.train()
+    def init(self, device, name_prep=None):
+        self.set_project_shell(device, name_prep)
+        self.project_shell.file_exists()
+    
+    def train(self, print_menu=True): 
+        self.project_shell.train(print_menu=print_menu)
 
 def main():
     Train()
 
-# python -m szx81.transformer.bert_rv.train
+# python -m szx82.transformer.bert.train
 if __name__ == "__main__":
      main()

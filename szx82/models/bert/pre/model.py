@@ -53,7 +53,7 @@ class MODEL(ModelEnv):
         pass
 
     def final_adj(self):
-        self.tokenizer = self.shell.transformer_shell.data_object.tokenizer
+        pass
 
     def forward(self, batch):
         model_out = self.model(

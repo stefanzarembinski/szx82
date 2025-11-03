@@ -1,23 +1,20 @@
+import sys
 from os import path, makedirs, listdir
 import time
 import numpy as np
 import pickle
 import zlib
 from matplotlib import pyplot as plt
-import szx81.core.core_ as co
-from szx81.core.helper import KeyPressed
+from szx82.core.tools import KeyPressed
 
 class ProjectShell:
     def __init__(
             self,
-            data_object,
             model_shell,
-            labels,
             store_dir, 
             file_name=None, 
             save=True):
 
-        self.data_object = data_object
         self.ms = model_shell
         self.ms.transformer_shell = self
         self.can_save = save
@@ -27,10 +24,6 @@ class ProjectShell:
         self.file_name_first = file_name
         self.store_dir = path.join(store_dir, self.file_name())
 
-        self.label = {}
-        for label in labels:
-            self.add_label(label)
-        self.add_label(model_shell.label)
         self.key_pressed = KeyPressed(locals())
         self.key_pressed.keys = [            
             [
@@ -134,29 +127,10 @@ input weight or nothing to abort: """
         """On stopping the current process.""" 
         self.save_self(verbose=True)
 
-    def train(self):
-        self.key_pressed.print_manu()          
+    def train(self, print_menu=True):
+        if print_menu:
+            self.key_pressed.print_menu()          
         self.ms.train()
-
-    @staticmethod
-    def str_label(label):
-        return '\n'.join('{0}: {1}'.format(k, v) for k, v in label.items())
-    
-    def add_label(self, label):
-        for k, v in label.items():
-            if k in self.label:
-                assert self.label[k] != v,\
-                    f'"{k}" value is not unique, either {self.label} or {[k]})'
-            self.label[k] = v
-
-    def add_to_label(self, k, v):
-        if k in self.label:
-                assert self.label[k] != v,\
-                    f'"{k}" value is not unique, either {self.label} or {[k]})'
-        self.label[k] = v
-
-    def __str__(self):
-        return self.str_label(self.label)
 
     def file_name(self):
         if self.file_name_first is not None:
@@ -177,17 +151,17 @@ project name: {self.file_name()}
                     f'\r "Y" for overwriting existing file in dir {path.normpath(self.store_dir)}, anything else for aborting: the process: '
                 )
                 if yes_or_no != "Y":
-                    exit()
+                    sys.exit()
             elif not path.exists(self.store_dir):
                 makedirs(self.store_dir, exist_ok=True)
 
-    def save(self, file_path=None, prep=None, verbose=True):
+    def save(self, file_path=None, verbose=True):
         self.save_model() # just update result records of the model 
-        if prep is not None:
-            file_path = prep + '_' + file_path
+        if file_path is None:
+            file_path = path.join(self.store_dir, self.file_name() + '.pkl')
         with open(file_path, "wb") as f:
             pickle.dump(self, f)
-        
+    
     def save_self(self, verbose=False):
         try:
             if self.can_save:

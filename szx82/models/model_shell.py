@@ -1,5 +1,4 @@
 import numpy as np
-from tqdm import tqdm
 import timeit
 import torch
 from torch.optim import Adam
@@ -97,35 +96,41 @@ class ModelShell:
         val_acc = None
         self.model_env.transformer_shell = self.transformer_shell
 
-        epochs = tqdm(desc='epochs', ncols=ncols)
-        epochs.update(1)
+        epochs = 0
         first_epoch = True
         
         self.model_env.final_adj()
 
-        while True:
-            epochs.update(1)
+        def print_progress(what, epoche, idx, dataloader):
             if train_loss0 and val_loss0:
-                epochs.set_description(f'loss trn,val:{train_loss / train_loss0:4.2f},{val_loss / val_loss0:4.2f} best: { best:0.2f}')
+                _best = 'none' if best is None else f'{best:0.2f}'
 
+                print(
+                    '\r',
+                    f'{what};',
+                    f'loss trn,val:{train_loss / train_loss0:4.2f} {val_loss / val_loss0:4.2f};',
+                    f'best:{_best};',
+                    f'train:{train_acc["msg"]};',
+                    f'val.:{val_acc["msg"]};',
+                    f'ep:{epoche};',
+                    f'batch:{idx}/{len(dataloader)};',
+                    '      ',
+                    end='\r')
+
+        while True:
+            epochs += 1
             self.model_env.model.train()
             train_current = []
             val_current = []            
 
             train_running_loss = 0 
-            train_tqdm = tqdm(self.train_dataloader, leave=False, ncols=ncols)
-            val_tqdm = tqdm(self.val_dataloader, leave=False, ncols=ncols)
 
             if self.transformer_shell is not None:
                  if self.transformer_shell.key_pressed.key_pressed():
                     break
 
-            if train_loss is not None:
-                train_tqdm.set_description(
-                                    f'train {train_acc["msg"]}')     
-                val_tqdm.set_description(f'val. {val_acc["msg"]}') 
-            
-            for idx, batch in enumerate(train_tqdm):
+            for idx, batch in enumerate(self.train_dataloader):
+                print_progress('training', epochs, idx, self.train_dataloader)
                 self.transformer_shell.key_pressed.read_key_pressed()
 
                 self.optimizer.zero_grad()
@@ -153,7 +158,8 @@ class ModelShell:
             with torch.no_grad():
                 val_running_loss = 0               
 
-                for idx, batch in enumerate(val_tqdm):
+                for idx, batch in enumerate(self.val_dataloader):
+                    print_progress('validation', epochs, idx, self.val_dataloader)
                     self.transformer_shell.key_pressed.read_key_pressed()
                     
                     loss = self.model_env(batch)

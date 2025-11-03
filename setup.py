@@ -39,7 +39,7 @@ setup(
 
 # To install from wheel:
 # pip install C:\Users\stefa\Documents\workspaces\szx82\dist\szx82-0.1-py3-none-any.whl
-
+ 
 
 
 
