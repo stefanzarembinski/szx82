@@ -5,7 +5,6 @@ import numpy as np
 import pickle
 import zlib
 from matplotlib import pyplot as plt
-from szx82.core.tools import KeyPressed
 
 class ProjectShell:
     def __init__(
@@ -23,68 +22,6 @@ class ProjectShell:
         
         self.file_name_first = file_name
         self.store_dir = path.join(store_dir, self.file_name())
-
-        self.key_pressed = KeyPressed(locals())
-        self.key_pressed.keys = [            
-            [
-                'key to STOP training',
-                b's',
-# must be boolean `retval` returned:
-                ''' 
-while msvcrt.kbhit():
-    msvcrt.getch()
-yes_or_no = input(
-    '"Y" for stopping, anything else for continuing: '
-)
-if yes_or_no == "Y":
-    self.save(verbose=True)
-    retval = True
-''',
-            ],
-            [
-                'key to save current training and print report',
-                b'r',
-                [
-                    (self.save, {'verbose': True}),
-                ],
-            ],
-            [
-                'key to save torch model',
-                b'm',
-                (self.save_model, {'verbose': True}),
-            ],
-            [
-                'key to plot losses',
-                b'p',
-                self.plot_training,
-            ],
-            [
-                'key to set weight',
-                 b'w',
-                 '''
-while True:
-    weight = self.ms.model_env.criterion.weight
-    if weight is not None:
-        weight = [round(_, 2) for _ in weight.tolist()]
-
-        weight = input(f"""
-
-Weight is {weight}.
-input weight or nothing to abort: """
-                    )
-        if not weight:
-            break
-        try:
-            weight = [float(_) for _ in weight.split(',')]
-        except Exception as ex:
-            print(ex)
-            continue
-        error = self.ms.model_env.set_weight(weight)
-        if error is None:
-            break
-'''
-            ]
-        ]
 
     def print_result(self):
         pass # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -127,9 +64,7 @@ input weight or nothing to abort: """
         """On stopping the current process.""" 
         self.save_self(verbose=True)
 
-    def train(self, print_menu=True):
-        if print_menu:
-            self.key_pressed.print_menu()          
+    def train(self):      
         self.ms.train()
 
     def file_name(self):

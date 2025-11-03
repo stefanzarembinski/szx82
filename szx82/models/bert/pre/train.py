@@ -166,8 +166,8 @@ vocab hash: {parameters['vocab_hash']}''')
         self.set_project_shell(device, name_prep)
         self.project_shell.file_exists()
     
-    def train(self, print_menu=True): 
-        self.project_shell.train(print_menu=print_menu)
+    def train(self): 
+        self.project_shell.train()
 
 def main():
     Train()

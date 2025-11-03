@@ -125,13 +125,8 @@ class ModelShell:
 
             train_running_loss = 0 
 
-            if self.transformer_shell is not None:
-                 if self.transformer_shell.key_pressed.key_pressed():
-                    break
-
             for idx, batch in enumerate(self.train_dataloader):
                 print_progress('training', epochs, idx, self.train_dataloader)
-                self.transformer_shell.key_pressed.read_key_pressed()
 
                 self.optimizer.zero_grad()
                 loss = self.model_env(batch)
@@ -160,7 +155,6 @@ class ModelShell:
 
                 for idx, batch in enumerate(self.val_dataloader):
                     print_progress('validation', epochs, idx, self.val_dataloader)
-                    self.transformer_shell.key_pressed.read_key_pressed()
                     
                     loss = self.model_env(batch)
                     val_current.append(self.model_env.current)
