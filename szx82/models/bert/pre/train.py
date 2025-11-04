@@ -22,9 +22,19 @@ class Dataset(Dataset):
         # print(self.data[index])
         return self.data[index]
     
-def data(data_file):
+def data(data_file, device=None):
     with open(data_file, "rb") as f:
         data = pickle.load(f)
+    if device is None:
+        return data
+    
+    for _ in data['train_data']:
+        for k, v in _['input'].items():
+            v = v.to(device)
+
+    for _ in data['val_data']:
+        for k, v in _['input'].items():
+            v = v.to(device)    
     return data
 
 class Train:
