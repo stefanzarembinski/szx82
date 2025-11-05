@@ -115,7 +115,7 @@ class ModelShell:
                     f'ep:{epoche};',
                     f'batch:{idx}/{len(dataloader)};',
                     '      ',
-                    end='\r')
+                    end='')
 
         while True:
             epochs += 1
