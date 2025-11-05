@@ -1,6 +1,7 @@
 import os
 from os import path
 import pickle
+import torch
 from torch.utils.data import Dataset, DataLoader
 
 from szx82.models.bert.pre.model import Config
@@ -22,19 +23,26 @@ class Dataset(Dataset):
         # print(self.data[index])
         return self.data[index]
     
-def data(data_file, device=None):
+def data(data_file, device='cpu'):
     with open(data_file, "rb") as f:
         data = pickle.load(f)
     if device is None:
         return data
     
-    for _ in data['train_data']:
-        for k, v in _['input'].items():
-            v = v.to(device)
+    def process(data_set):
+        data_set_ = []
+        for _ in data_set:
 
-    for _ in data['val_data']:
-        for k, v in _['input'].items():
-            v = v.to(device)    
+            input_ = {}
+            for k, v in _['input'].items():
+                input_[k] = torch.LongTensor(v, device=device)
+            
+            data_set_.append({'input': input_, 'admin': _['admin']})
+        return data_set_
+    
+    data['train_data'] = process(data['train_data'])
+    data['val_data'] = process(data['val_data'])
+      
     return data
 
 class Train:
@@ -44,10 +52,10 @@ class Train:
             data_store,
             data,
             model,         
-            hidden_size=128,
-            intermediate_size=4 * 128, # 4 * hidden_size?
-            num_hidden_layers=6,
-            num_attention_heads=2,
+            hidden_size=128, # defaults to 768
+            intermediate_size=4 * 128, # 4 * hidden_size? # defaults to 3072
+            num_hidden_layers=6, # defaults to 12
+            num_attention_heads=2, # defaults to 12
             dropout=0.5,
             weight=None, 
             data_split={'train_val': 0.75, 'val_test': 0.25},
