@@ -56,6 +56,13 @@ class MODEL(ModelEnv):
         pass
 
     def forward(self, batch):
+        print('''
+input_ids: {batch['input']['input_ids'].is_cuda}
+attention_mask: {batch['input']['attention_mask'].is_cuda}
+token_type_ids: {batch['input']['token_type_ids'].is_cuda}
+next_sentence_label: {batch['input']['next_sentence_label'].is_cuda}              
+''')
+        raise Exception('cuda check')
         model_out = self.model(
                 output_hidden_states=True, 
                 return_dict=True,
