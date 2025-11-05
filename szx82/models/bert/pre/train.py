@@ -35,7 +35,7 @@ def data(data_file, device='cpu'):
 
             input_ = {}
             for k, v in _['input'].items():
-                input_[k] = torch.LongTensor(v, device=device)
+                input_[k] = torch.tensor(v, dtype=torch.long, device=device)
             
             data_set_.append({'input': input_, 'admin': _['admin']})
         return data_set_
