@@ -56,7 +56,7 @@ class MODEL(ModelEnv):
         pass
 
     def forward(self, batch):
-        print('''
+        print(f'''
 input_ids: {batch['input']['input_ids'].is_cuda}
 attention_mask: {batch['input']['attention_mask'].is_cuda}
 token_type_ids: {batch['input']['token_type_ids'].is_cuda}
