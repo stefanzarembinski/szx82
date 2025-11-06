@@ -154,16 +154,14 @@ vocab hash: {parameters['vocab_hash']}''')
         model_shell = ModelShell(
                 train_dataloader=DataLoader(
                                     train_dataset,
-                                    batch_size=len(train_dataset) \
-                                        if self.batch_size is None \
-                                            else self.batch_size, 
+                                    batch_size=self.batch_size, 
                                     shuffle=True, 
                                     pin_memory=False,
                                     drop_last=True,
                                 ),
                 val_dataloader=DataLoader(
                                     val_dataset,
-                                    batch_size=len(val_dataset), 
+                                    batch_size=self.batch_size, 
                                     shuffle=False, 
                                     pin_memory=False,
                                     drop_last=True,
