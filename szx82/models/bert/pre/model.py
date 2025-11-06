@@ -84,6 +84,7 @@ class MODEL(ModelEnv):
         mlm_eq = sum(masked_lbs == masked_pred).item()
         mlm_count = len(masked_lbs)        
         
+        # batch result is collected for accuracy calculations
         self.current = {
             'loss': loss.cpu().detach().tolist(),
             'nsp_eq': sum(
@@ -106,4 +107,4 @@ class MODEL(ModelEnv):
         return {
             'acc': {'nsp': nsp, 'mlm': mlm}, 
             'msg': msg, 
-            'best': nsp + mlm}
+            'accuracy': nsp + mlm}

@@ -55,7 +55,7 @@ class MODEL(ModelEnv):
         self.criterion = self.config.criterion(weight=weight, reduction='none')
 
     def final_adj(self):
-        self.tokenizer = self.shell.transformer_shell.data_object.tokenizer
+        self.tokenizer = self.shell.project_shell.data_object.tokenizer
 
     def forward(self, batch):
         model_out = self.model(

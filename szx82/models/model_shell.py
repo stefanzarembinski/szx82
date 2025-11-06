@@ -1,5 +1,4 @@
 import numpy as np
-import timeit
 import torch
 from torch.optim import Adam
 
@@ -59,15 +58,13 @@ class ModelShell:
 
         self.train_dataloader = train_dataloader
         self.val_dataloader = val_dataloader
-        self.transformer_shell = None
+        self.project_shell = None
         self.train_history = {
             'train losses': [],
             'train acc': [],
             'val losses': [],
             'val acc': [],
         }
-        self.train_results = None # predictions vs target over epoch
-        self.val_results = None
         
         self.optimizer = Adam(
             self.model_env.model.parameters(), 
@@ -82,7 +79,6 @@ class ModelShell:
         )
 
     def train(self):
-        start = timeit.default_timer()
         train_loss = None
         train_loss0 = None
         
@@ -94,11 +90,10 @@ class ModelShell:
         ncols=80
         train_acc = None
         val_acc = None
-        self.model_env.transformer_shell = self.transformer_shell
-
         epochs = 0
         first_epoch = True
-        
+
+        self.model_env.project_shell = self.project_shell
         self.model_env.final_adj()
 
         def print_progress(what, epoche, idx, dataloader):
@@ -108,14 +103,14 @@ class ModelShell:
                 print(
                     '\r',
                     f'{what};',
-                    f'loss trn,val:{train_loss / train_loss0:4.2f} {val_loss / val_loss0:4.2f};',
+                    f'loss trn,val:{train_loss / train_loss0:4.2f},{val_loss / val_loss0:4.2f};',
                     f'best:{_best};',
                     f'train:{train_acc["msg"]};',
                     f'val.:{val_acc["msg"]};',
                     f'ep:{epoche};',
                     f'batch:{idx}/{len(dataloader)};',
                     '      ',
-                    end='')
+                    end='') 
 
         while True:
             epochs += 1
@@ -144,10 +139,9 @@ class ModelShell:
                     train_loss0 = train_loss
 
             self.train_history['train losses'].append(train_loss)
-            train_current = self.model_env.cumulate(train_current)
-            train_acc = self.model_env.accuracy(train_current)
+            train_acc = self.model_env.accuracy(
+                    self.model_env.cumulate(train_current))
             self.train_history['train acc'].append(train_acc['acc'])
-            self.train_results = train_current
 
             self.model_env.model.eval()
             with torch.no_grad():
@@ -167,31 +161,28 @@ class ModelShell:
                     val_loss0 = val_loss
 
             self.train_history['val losses'].append(val_loss)
-            val_current = self.model_env.cumulate(val_current)
-            val_acc = self.model_env.accuracy(val_current)
+            val_acc = self.model_env.accuracy(
+                                        self.model_env.cumulate(val_current))
             self.train_history['val acc'].append(val_acc['acc'])
-            self.val_results = val_current
             
-            if best is None:
-                best = val_acc['best']
-            if (val_acc['best'] / (abs(best) + 1e-12) - 1) \
+            if best is None: 
+                best = val_acc['accuracy']
+            if (val_acc['accuracy'] / (abs(best) + 1e-12) - 1) \
                                                     > best_thd:
-                best = val_acc['best']
-                if self.transformer_shell is not None:
-                    self.transformer_shell.save_model(
+                best = val_acc['accuracy']
+                if self.project_shell is not None:
+                    self.project_shell.save_model(
                         best=True,
                         verbose=False)
+                    
+            # stop if `ctr_value` is clearly positive:
+            if self.project_shell.stopper.stop(
+                # train loss is much smaller then val loss:
+                    val_loss / val_loss0 - train_loss / train_loss0):
+                if self.project_shell.stop():
+                    break
 
             first_epoch = False
 
-        stop = timeit.default_timer()
-        print(f"Training Time: {stop-start:.2f} s")
-    
     def save_model(self, file_path):
-        self.model_env.set_results(self.train_results, self.val_results)
-        # if file_path is not None:     
-        #     with open(file_path, 'wb') as f:
-        #         pickle.dump(self.model_env.model, f)
-        # https://stackoverflow.com/questions/42703500/how-do-i-save-a-trained-model-in-pytorch
-        # A common PyTorch convention is to save tensors using .pt file extension.
         self.model_env.model.save_pretrained(file_path)

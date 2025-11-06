@@ -14,7 +14,7 @@ class MODEL(nn.Module):
         if isinstance(config_or_model, Model):
             self.model = config_or_model
             self.config = self.model.config
-            assert self.shell.transformer_shell.data_object.vocab_hash \
+            assert self.shell.project_shell.data_object.vocab_hash \
                 == self.config.vocab, \
                     'Train-time vocab differs from the current one!'
         else:
@@ -52,12 +52,6 @@ class MODEL(nn.Module):
             for _ in current:
                 cc[k].append(_[k])
         return cc
-    
-    def set_results(self, train, val, test=None):
-        self.train_results = train
-        self.val_results = val
-        if test is not None:
-            self.test_results = test
     
     def final_adj(self):
         pass

@@ -63,6 +63,7 @@ class Train:
             pretrained_path=None,
             criterion=None,
             lr=0.0004,
+            stop_thd=0.1
             ):
         self.file_name = file_name
         self.data_store = data_store
@@ -82,6 +83,7 @@ class Train:
         self.criterion = criterion
         self.device = None
         self.lr = lr
+        self.stop_thd = stop_thd
 
     def set_project_shell(self, device, name_prep=None):
         self.device = device
@@ -161,9 +163,7 @@ vocab hash: {parameters['vocab_hash']}''')
                                 ),
                 val_dataloader=DataLoader(
                                     val_dataset,
-                                    batch_size=len(val_dataset) \
-                                        if self.batch_size is None \
-                                            else self.batch_size, 
+                                    batch_size=len(val_dataset), 
                                     shuffle=False, 
                                     pin_memory=False,
                                     drop_last=True,
@@ -178,11 +178,12 @@ vocab hash: {parameters['vocab_hash']}''')
                 store_dir=path.join(
                     self.data_store, parameters['data_file_name']),
                 file_name=self.file_name,
+                stop_thd=self.stop_thd
             )
 
-    def init(self, device, name_prep=None):
+    def init(self, device, name_prep=None, force=False):
         self.set_project_shell(device, name_prep)
-        self.project_shell.file_exists()
+        self.project_shell.file_exists(force=force)
     
     def train(self): 
         self.project_shell.train()
