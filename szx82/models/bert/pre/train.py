@@ -184,8 +184,6 @@ vocab hash: {parameters['vocab_hash']}''')
         self.project_shell.file_exists(force=force)
     
     def train(self):
-        self.project_shell.save_self()
-        return
         self.project_shell.train()
 
 def main():
