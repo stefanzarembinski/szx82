@@ -161,7 +161,7 @@ vocab hash: {parameters['vocab_hash']}''')
                                 ),
                 val_dataloader=DataLoader(
                                     val_dataset,
-                                    batch_size=self.batch_size, 
+                                    batch_size=1028,#self.batch_size, 
                                     shuffle=False, 
                                     pin_memory=False,
                                     drop_last=True,
@@ -183,7 +183,9 @@ vocab hash: {parameters['vocab_hash']}''')
         self.set_project_shell(device, name_prep)
         self.project_shell.file_exists(force=force)
     
-    def train(self): 
+    def train(self):
+        self.project_shell.save_self()
+        return
         self.project_shell.train()
 
 def main():

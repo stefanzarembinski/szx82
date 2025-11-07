@@ -11,7 +11,7 @@ from scipy.optimize import curve_fit
 
 class Stopper:
     def __init__(self, min_ep_count=20, timeout=60, 
-                 tail=20, threshold=0.1):
+                 tail=20, threshold=0.2):
         self.min_ep_count = min_ep_count
         self.timeout = timeout * 60
         self.tail = tail
