@@ -150,7 +150,7 @@ vocab hash: {parameters['vocab_hash']}''')
             vocab=parameters['vocab_hash'], 
             pretrained_path = self.pretrained_path
         )
-
+        print(f'train.py 1153;  id(type(self.config)): {id(type(self.config))}')
         model_shell = ModelShell(
                 train_dataloader=DataLoader(
                                     train_dataset,

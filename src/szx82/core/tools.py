@@ -1,9 +1,3 @@
-import time
-import traceback
-from collections.abc import Iterable
-from matplotlib import pyplot as plt
-from matplotlib.widgets import Slider
-
 def slice(start_stop, data):
     start_stop = list(start_stop)
 
