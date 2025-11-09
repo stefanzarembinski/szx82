@@ -5,7 +5,7 @@ from transformers import BertForMaskedLM, BertConfig
 
 import szx81.core.core_ as co
 from szx81.models.model_env import MODEL as ModelEnv
-from szx81.models.bert_rv.dataset import Data
+from szx81.models.bert_rv.data import Data
 
 """Model shell for masked words
 """
@@ -30,7 +30,6 @@ class Config(BertConfig):
 class Model(BertForMaskedLM):
     def __init__(self, config):
         super().__init__(config)
-        self.config = config
 
         if config.path is not None:
             self = BertForMaskedLM.from_pretrained(
@@ -51,8 +50,8 @@ class MODEL(ModelEnv):
         self.acc = None
 
     def set_criterion(self, weight):
-        self.config.crit_weight = weight
-        self.criterion = self.config.criterion(weight=weight, reduction='none')
+        self.model.config.crit_weight = weight
+        self.criterion = self.model.config.criterion(weight=weight, reduction='none')
 
     def final_adj(self):
         self.tokenizer = self.shell.project_shell.data_object.tokenizer
@@ -75,9 +74,9 @@ class MODEL(ModelEnv):
         # # From BertForMaskedLM source code:
         # loss_fct = CrossEntropyLoss()  # -100 index = padding token
         # masked_lm_loss = loss_fct(
-        #     # 736 == batch_size * self.config.max_position_embeddings
+        #     # 736 == batch_size * self.model.config.max_position_embeddings
         #     # 261 == self.tokenizer.vocab_size
-        #     logits.view(-1, self.config.vocab_size), # shape: [736, 261]
+        #     logits.view(-1, self.model.config.vocab_size), # shape: [736, 261]
         #     batch['input']['labels'].view(-1)) # shape [736]
         # loss_fct == loss is True
 

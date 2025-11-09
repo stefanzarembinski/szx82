@@ -23,9 +23,12 @@ class Dataset(Dataset):
         # print(self.data[index])
         return self.data[index]
     
-def data(data_file, device='cpu'):
-    with open(data_file, "rb") as f:
-        data = pickle.load(f)
+def data(data_file_or_object, device='cpu'):
+    if isinstance(data_file_or_object, str):
+        with open(data_file_or_object, "rb") as f:
+            data = pickle.load(f)
+    else: 
+        data = data_file_or_object
     if device is None:
         return data
     
@@ -42,7 +45,8 @@ def data(data_file, device='cpu'):
     
     data['train_data'] = process(data['train_data'])
     data['val_data'] = process(data['val_data'])
-      
+    data['test_data'] = process(data['test_data'])
+    
     return data
 
 class Train:
@@ -101,7 +105,7 @@ validation data size: {len(val_dataset)}
 test data size: {len(self.data['test_data'])}
 vocab hash: {parameters['vocab_hash']}''')
     
-        self.config = Config(
+        config = Config(
             vocab_size=parameters['vocab_size'],
             hidden_size=self.hidden_size, # Dimensionality of the encoder
             # layers and the pooler layer.
@@ -150,7 +154,7 @@ vocab hash: {parameters['vocab_hash']}''')
             vocab=parameters['vocab_hash'], 
             pretrained_path = self.pretrained_path
         )
-        print(f'train.py 1153;  id(type(self.config)): {id(type(self.config))}')
+
         model_shell = ModelShell(
                 train_dataloader=DataLoader(
                                     train_dataset,
@@ -167,7 +171,7 @@ vocab hash: {parameters['vocab_hash']}''')
                                     drop_last=True,
                                 ),
                 ModelClass=self.model,
-                config=self.config,
+                config=config,
                 lr=self.lr,        
         )
             

@@ -122,11 +122,20 @@ project name: {self.file_name()}
                 makedirs(self.store_dir, exist_ok=True)
 
     def save(self, file_path=None, verbose=True):
-        self.save_model() # just update result records of the model 
-        if file_path is None:
-            file_path = path.join(self.store_dir, self.file_name() + '.pkl')
-            if verbose:
-                print(f'Project saved:\n{file_path}')
+        model_sto = self.ms.model_env.model
+        self.ms.model_env.model = None
+        try:
+            if file_path is None:
+                file_path = path.join(self.store_dir, self.file_name() + '.pkl')
+                if verbose:
+                    print(f'Project saved:\n{file_path}') 
+        except Exception as ex:
+            print(ex) 
+        self.ms.model_env.model = model_sto      
+        # id(type(self.ms.model_env.model.config))
+
+        self.save_model()        
+
         with open(file_path, "wb") as f:
             pickle.dump(self, f)
     

@@ -7,11 +7,10 @@ from torch.utils.data import DataLoader
 
 import szx81.core.core_ as co
 from szx81.data_segments.data_segment import DataSegments
-from szx81.models.bert_rv.dataset import Data
-from szx81.models.bert_rv.dataset import Dataset
-from szx81.models.bert_rv.cls.model import Config
-from szx81.models.model_shell import ModelShell
-from szx81.models.project_shell import ProjectShell
+from szx81.models.bert.dataset import Data
+from szx82.models.bert.pre.model import Config
+from szx82.models.model_shell import ModelShell
+from szx82.models.project_shell import ProjectShell
 
 class Train:
     def __init__(
@@ -72,7 +71,7 @@ class Train:
                 data_slice=self.data_slice,
                 )
     
-        self.config = Config(
+        config = Config(
             vocab_size=data_object.tokenizer.vocab_size,
             max_position_embeddings=data_object.seq_len,
             hidden_dim=self.d_model,
@@ -114,7 +113,7 @@ class Train:
                                     drop_last=True,
                                 ),
                 ModelClass=self.model,
-                config=self.config,
+                config=config,
                 device=self.device,               
         )
             

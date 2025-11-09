@@ -48,7 +48,8 @@ def main():
         DATA_STORE, 
         r'dev_tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;level-4;.pkl'))
     training_shell.batch_size = 64
-    training_shell.train(DEVICE, name_prep='dev')
+    training_shell.init(DEVICE, name_prep='dev', force=True)
+    training_shell.train()
     
     # ##### testing training CONTINUATION
     # training_shell.model_config_or_path = r'C:\Users\stefa\Documents\workspaces\szx81\EURUSD\data_store\tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;level-4;\BERT_PRE_bert_rv\BERT_PRE_bert_rv_bst_.pt'
