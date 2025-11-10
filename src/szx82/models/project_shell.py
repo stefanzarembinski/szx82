@@ -88,8 +88,8 @@ class ProjectShell:
     def train(self):
         if self.ok_run:      
             self.ms.train()
+    
     def stop(self):
-        self.save_self()
         print(
         f"Training Time: {timeit.default_timer() - self.start:.2f} s")        
         self.plot_training()
@@ -121,37 +121,12 @@ project name: {self.file_name()}
             elif not path.exists(self.store_dir):
                 makedirs(self.store_dir, exist_ok=True)
 
-    def save(self, file_path=None, verbose=True):
-        self.save_model() # just update result records of the model 
-        if file_path is None:
-            file_path = path.join(self.store_dir, self.file_name() + '.pkl')
-            if verbose:
-                print(f'Project saved:\n{file_path}')
-        with open(file_path, "wb") as f:
-            pickle.dump(self, f)
-    
-    def save_self(self, verbose=True):
-        try:
-            if self.can_save:
-                self.save(verbose=verbose)
-        except Exception as ex:
-            print(ex)
-
     def get_model_file(self, best=False):
         if best:
             return path.join(
             self.store_dir, self.file_name() + '_' + 'bst' + '_' + '.pt')
         return  path.join(self.store_dir, self.file_name() + '.pt')
 
-    def save_model(self, best=False, verbose=True):           
-        try:
-            self.ms.save_model(file_path := self.get_model_file(best))
-            if verbose:
-                print(f'''Model saved:
-{file_path}
-''')
-        except Exception as ex:
-            print(ex)
 
 
     
