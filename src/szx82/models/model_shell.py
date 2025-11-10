@@ -50,6 +50,7 @@ class ModelShell:
         warmup_steps=10000,
     ):
         self.label = {'ModelClass': ModelClass}      
+        self.config = config
         self.model_env = ModelClass(
             config=config,
             shell=self

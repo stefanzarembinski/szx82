@@ -7,17 +7,7 @@ from szx82.models.model_env import MODEL as ModelEnv
 """Model shell for masked words
 """
 
-def model_factory(config_or_path):
-    if isinstance(config_or_path, str):
-        return BertForPreTraining.from_pretrained(
-                pretrained_model_name_or_path=config_or_path)
-    if config_or_path.pretrained_path is not None:
-            return BertForPreTraining.from_pretrained( 
-                pretrained_model_name_or_path=config_or_path.pretrained_path)
-    return BertForPreTraining(config_or_path)
-
-class Config(BertConfig):
-    _instance = None  
+class Config(BertConfig):  
     def __init__(
             self, vocab_size=30522, hidden_size=768, num_hidden_layers=12, num_attention_heads=12, intermediate_size=3072, hidden_act="gelu", hidden_dropout_prob=0.1, attention_probs_dropout_prob=0.1, max_position_embeddings=512, type_vocab_size=2, initializer_range=0.02, layer_norm_eps=1e-12, pad_token_id=0, position_embedding_type="absolute", use_cache=True, classifier_dropout=None, 
             device='cpu',
@@ -36,8 +26,17 @@ class Config(BertConfig):
         self.device = device
         self.pretrained_path = pretrained_path
 
-    def model_factory(config_or_path):
-        pass
+class Model(BertForPreTraining):
+    def __init__(self, config_or_path):
+        if isinstance(config_or_path, str):
+            self = BertForPreTraining.from_pretrained(
+                pretrained_model_name_or_path=config_or_path)
+        elif config_or_path.pretrained_path is not None:
+            self = BertForPreTraining.from_pretrained( 
+                pretrained_model_name_or_path=config_or_path.pretrained_path)
+        else:
+            super().__init__(config_or_path)
+            self.config = config_or_path
 
 class MODEL(ModelEnv):
     DATASET = (BertForPreTraining)
@@ -48,7 +47,7 @@ class MODEL(ModelEnv):
         # `config_or_model` can be a restored `Model` object coming with 
         # its oun config object, or it can be a configuration object to be used 
         # to create a `Model` object
-        super().__init__(model_factory, config, shell, *args, **kwargs)
+        super().__init__(Model, config, shell, *args, **kwargs)
 
     def set_criterion(self, weight):
         pass

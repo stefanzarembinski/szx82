@@ -7,7 +7,7 @@ from sklearn.metrics import confusion_matrix
 
 import szx81.core.core_ as co
 from szx81.models.model_env import MODEL as ModelEnv
-from szx81.models.bert_rv.data import Data
+from szx81.models.bert_rv.dataset import Data
 
 """Model shell for masked words
 """
@@ -32,6 +32,7 @@ class Config(BertConfig):
 class Model(BertForSequenceClassification):
     def __init__(self, config):
         super().__init__(config)
+        self.config = config
 
         if config.path is not None:
             self = BertForSequenceClassification.from_pretrained(
@@ -52,8 +53,8 @@ class MODEL(ModelEnv):
         self.acc = None
 
     def set_criterion(self, weight):
-        self.model.config.crit_weight = weight
-        self.criterion = self.model.config.criterion(weight=weight, reduction='none')
+        self.config.crit_weight = weight
+        self.criterion = self.config.criterion(weight=weight, reduction='none')
 
     def final_adj(self):
         self.tokenizer = self.shell.project_shell.data_object.tokenizer

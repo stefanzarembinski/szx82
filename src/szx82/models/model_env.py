@@ -3,7 +3,7 @@ from torch import nn
 class MODEL(nn.Module):
     FILE_PREFIX = 'Out'
     def __init__(self,
-                model_factory,
+                Model,
                 config_or_model,
                 shell=None,                 
                 *args, **kwargs):
@@ -11,9 +11,17 @@ class MODEL(nn.Module):
         super().__init__(*args, **kwargs)
 
         self.shell = shell
-        model = model_factory(config_or_model).to(config_or_model.device)
-        self.model = model.to(model.config.device)
-        self.set_criterion(config_or_model.crit_weight)    
+        if isinstance(config_or_model, Model):
+            self.model = config_or_model
+            self.config = self.model.config
+            assert self.shell.project_shell.data_object.vocab_hash \
+                == self.config.vocab, \
+                    'Train-time vocab differs from the current one!'
+        else:
+            self.config = config_or_model
+            self.model = Model(self.config).to(self.config.device)
+        self.device = self.config.device 
+        self.set_criterion(self.config.crit_weight)    
 
     def forward(self, batch):
         loss = None # = model_out.loss
@@ -25,11 +33,11 @@ class MODEL(nn.Module):
     def set_weight(self, weight):
         if not weight:
             return
-        if not hasattr(self.model.config, 'crit_weight'):
+        if not hasattr(self.config, 'crit_weight'):
             return
         try:
-            if self.model.config.crit_weight:
-                weight =  self.model.config.crit_weight * weight
+            if self.config.crit_weight:
+                weight =  self.config.crit_weight * weight
             
             self.set_criterion(weight)
 
