@@ -42,6 +42,7 @@ def data(data_file, device='cpu'):
     
     data['train_data'] = process(data['train_data'])
     data['val_data'] = process(data['val_data'])
+    data['test_data'] = process(data['test_data'])
       
     return data
 
