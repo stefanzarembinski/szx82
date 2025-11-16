@@ -43,17 +43,18 @@ class ModelShell:
         train_dataloader,
         val_dataloader,
         ModelClass,
-        config,
+        config_or_path,
         lr=0.001,
         weight_decay=0.0,
         betas=(0.9, 0.999),
         warmup_steps=10000,
+        **kwargs
     ):
         self.label = {'ModelClass': ModelClass}      
-        self.config = config
         self.model_env = ModelClass(
-            config=config,
-            shell=self
+            config_or_path=config_or_path,
+            shell=self,
+            kwargs=kwargs
         )
 
         self.train_dataloader = train_dataloader

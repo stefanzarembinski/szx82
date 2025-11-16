@@ -8,7 +8,7 @@ from szx82.models.bert.pre.model import MODEL
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu" 
 DATA_STORE = r'C:\Users\stefa\Documents\workspaces\szx81\EURUSD\data_store'
-DATA_FILE = r'data_tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;level-4;.pkl'
+DATA_FILE = r'data_tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;level-4;_pre.pkl'
 
 training_shell = Train(
     file_name='bert',

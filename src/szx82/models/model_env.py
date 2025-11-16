@@ -5,19 +5,19 @@ class MODEL(nn.Module):
     def __init__(self,
                 model_factory,
                 config_or_model,
-                shell=None,                 
-                *args, **kwargs):
+                shell=None,
+                args=None):
 
-        super().__init__(*args, **kwargs)
+        super().__init__()
 
         self.shell = shell
-        model = model_factory(config_or_model)
+        model = model_factory(config_or_model, args)
         self.model = model.to(model.config.device)
         self.set_criterion(self.model.config.crit_weight)    
 
     def forward(self, batch):
         loss = None # = model_out.loss
-        return loss
+        return loss 
     
     def set_criterion(self, weight):
         raise NotImplemented()

@@ -7,14 +7,11 @@ from szx82.models.model_env import MODEL as ModelEnv
 """Model shell for masked words
 """
 
-def model_factory(config_or_path):
-    if isinstance(config_or_path, str):
-        return BertForPreTraining.from_pretrained(
-                pretrained_model_name_or_path=config_or_path)
-    if config_or_path.pretrained_path is not None:
-        return BertForPreTraining.from_pretrained( 
-                pretrained_model_name_or_path=config_or_path.pretrained_path)
-    return BertForPreTraining(config_or_path)
+def model_factory(config_or_path, args=None):
+    if isinstance(config_or_path, BertConfig):
+        return BertForPreTraining(config_or_path)
+    return BertForPreTraining.from_pretrained(
+                            pretrained_model_name_or_path=config_or_path)
 
 class Config(BertConfig):  
     def __init__(
@@ -36,15 +33,14 @@ class Config(BertConfig):
         self.pretrained_path = pretrained_path
 
 class MODEL(ModelEnv):
-    DATASET = (BertForPreTraining)
+    DATASET = ('pre')
     FILE_PREFIX = 'BERT_PRE'
 
-    def __init__(self, config, shell=None, 
-                 *args, **kwargs):
+    def __init__(self, config_or_path, shell=None, **kwargs):
         # `config_or_model` can be a restored `Model` object coming with 
         # its oun config object, or it can be a configuration object to be used 
         # to create a `Model` object
-        super().__init__(model_factory, config, shell, *args, **kwargs)
+        super().__init__(model_factory, config_or_path, shell)
 
     def set_criterion(self, weight):
         pass
@@ -53,13 +49,6 @@ class MODEL(ModelEnv):
         pass
 
     def forward(self, batch):
-#         print(f'''
-# input_ids: {batch['input']['input_ids'].is_cuda}
-# attention_mask: {batch['input']['attention_mask'].is_cuda}
-# token_type_ids: {batch['input']['token_type_ids'].is_cuda}
-# next_sentence_label: {batch['input']['next_sentence_label'].is_cuda}              
-# ''')
-#         raise Exception('cuda check')
         model_out = self.model(
                 output_hidden_states=True, 
                 return_dict=True,
@@ -72,12 +61,12 @@ class MODEL(ModelEnv):
         # Total loss as the sum of the masked language modeling loss and the 
         # next sequence prediction (classification) loss:
         loss = model_out.loss
-
+ 
         labels = batch['input']['labels']
-        masked_idxs = (labels != -100).nonzero(as_tuple=True)
-        masked_lbs = labels[masked_idxs]
+        masked_ids = (labels != -100).nonzero(as_tuple=True)
+        masked_lbs = labels[masked_ids]
         pred = torch.topk(prediction_logits, k=1, dim=-1)[1].squeeze()
-        masked_pred = pred[masked_idxs]
+        masked_pred = pred[masked_ids]
         mlm_eq = sum(masked_lbs == masked_pred).item()
         mlm_count = len(masked_lbs)        
         
@@ -99,7 +88,6 @@ class MODEL(ModelEnv):
                         / sum(current_cumulated['nsp_count']) - 0.5
         mlm = sum(current_cumulated['mlm_eq']) \
                                     / sum(current_cumulated['mlm_count'])
-        
         msg = f'nsp,mlm:{nsp:.2f},{mlm:.2f}'
         return {
             'acc': {'nsp': nsp, 'mlm': mlm}, 

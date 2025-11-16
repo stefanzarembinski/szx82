@@ -1,42 +1,67 @@
+from os import path
+import pickle
 import torch
 torch.autograd.set_detect_anomaly(False)
 
-from szx81.models.bert_rv.dataset import Data
- 
-# from szx81.data.forecast import Forecast
-from szx81.models.bert_rv.cls.train import Train
-from szx81.models.bert_rv.cls.model import MODEL
+from szx82.models.bert.cls.train import Train, data
+from szx82.models.bert.cls.model import MODEL
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu" 
+DATA_STORE = r'C:\Users\stefa\Documents\workspaces\szx81\EURUSD\data_store'
+DATA_FILE = r'data_tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;level-4;_cls.pkl'
 
-bert = Train(
-    file_name='bert_rv',
-    tokenizer_file=r'tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;level-4;',  
-    prediction_file=r'forecast;profit_min-8.0;panic_threshold-2.0;data_window-30;',
-    model=MODEL,
-    data_slice=(0, 100000), # (0.5, None),
-    batch_size=32,
-    d_model=16,
-    intermediate_size=128,
-    dropout=0.5,
+training_shell = Train(
+    file_name='bert',
+    data_store=DATA_STORE,
+    data=None,
+    model=MODEL,  
 )
 
+def restore_project_training(project_file):
+    project_shell = None
+    try:
+        path.exists(project_file)
+        with open(project_file, 'rb') as f: 
+            project_shell = pickle.load(f)
+    except Exception as ex:
+        print(f'ERROR!\n{str(ex)}')
+    if project_shell is not None:
+        project_shell.train()
+ 
 def main():
-    bert.train(DEVICE, name_prep=None)
+    # restore_project_training(
+    #      r'C:\Users\stefa\Documents\workspaces\szx81\EURUSD\data_store\tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;level-4;\BERT_PRE_bert_rv_dev\BERT_PRE_bert_rv_dev.pkl')
+
+    # # PROJECT
+    # training_shell.data = data(path.join(DATA_STORE, DATA_FILE))
+    # # vocab:  RY9oRdHDGk7rFWlsW2RnCDqvJtg=  
+    # training_shell.batch_size = 256
+    # training_shell.train(DEVICE, name_prep='bs256') 
+    # loss trn,val:0.37,0.44 best: 0.62
+
+    # # vocab:  RY9oRdHDGk7rFWlsW2RnCDqvJtg=  
+    # training_shell.batch_size = 256
+    # training_shell.train(DEVICE, name_prep='ds200k')     
+    
+    # ##### testing DEVELOPMENT    
+    training_shell.data = data(path.join(
+        DATA_STORE, 
+        r'dev_tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;level-4;.pkl'))
+    training_shell.batch_size = 64
+    training_shell.train(DEVICE, name_prep='dev')
+    
+    # ##### testing training CONTINUATION
+    # training_shell.model_config_or_path = r'C:\Users\stefa\Documents\workspaces\szx81\EURUSD\data_store\tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;level-4;\BERT_PRE_bert_rv\BERT_PRE_bert_rv_bst_.pt'
+    # training_shell.train(DEVICE, name_prep='cont')
 
 '''DEFAULTS:
-    d_model=64,
-    intermediate_size=256,
-    dropout=0.3,
-    data_slice=(None, None), # (0.5, None)
-    weight=None, 
-    data_split={'train_val': 0.5, 'val_test': 0.75},
-    resampler=None,
-    batch_size=16,
-    model_config_or_path=None,
-    criterion=CrossEntropyLoss,
 '''
 
-# python -m szx81.models.bert_rv.cls.trainings
+# python -m szx82.models.bert.cls.trainings 
 if __name__ == "__main__":
-     main()
+     main() 
+
+"""
+BLOG
+
+""" 

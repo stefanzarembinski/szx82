@@ -126,6 +126,12 @@ project name: {self.file_name()}
             return path.join(
             self.store_dir, self.file_name() + '_' + 'bst' + '_' + '.pt')
         return  path.join(self.store_dir, self.file_name() + '.pt')
+    
+    def save_model(self, best=True, verbose=False): 
+        file_path = self.get_model_file(best=best)
+        self.ms.save_model(file_path)
+        if verbose:
+            print(f'''model saved: {file_path}''')
 
 
 
