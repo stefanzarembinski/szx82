@@ -19,11 +19,12 @@ class Dataset(Dataset):
         # print(self.data[index])
         return self.data[index]
     
-def data(data_file, device='cpu', dtype=torch.long):
-    with open(data_file, "rb") as f:
-        data = pickle.load(f)
-    if device is None:
-        return data
+def data(data_or_file, device='cpu', dtype=torch.long):
+    if isinstance(data_or_file, str):
+        with open(data_or_file, "rb") as f:
+            data = pickle.load(f)
+    else:
+        data = data_or_file
     
     def process(data_set):
         data_set_ = []
