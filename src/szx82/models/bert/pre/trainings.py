@@ -3,7 +3,7 @@ import pickle
 import torch
 torch.autograd.set_detect_anomaly(False)
 
-from szx82.models.bert.pre.train import Train, data
+from szx82.models.bert.train import Train, data
 from szx82.models.bert.pre.model import MODEL
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu" 

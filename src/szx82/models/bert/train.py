@@ -6,9 +6,9 @@ from torch.utils.data import DataLoader
 from szx82.models.bert.pre.model import Config
 from szx82.models.model_shell import ModelShell
 from szx82.models.project_shell import ProjectShell
-from szx82.models.bert.train_again import Dataset, TrainAgain
+from szx82.models.bert.re_train import Dataset, ReTrain
 
-class Train(TrainAgain):
+class Train(ReTrain):
     def __init__(
             self, 
             file_name, 
@@ -23,8 +23,6 @@ class Train(TrainAgain):
             num_hidden_layers=6, # defaults to 12
             num_attention_heads=2, # defaults to 12            
             dropout=0.5,
-            criterion=None,
-            weight=None,
             lr=0.0004, 
             stop_thd=0.1,
             
@@ -37,8 +35,6 @@ class Train(TrainAgain):
         self.num_hidden_layers = num_hidden_layers
         self.num_attention_heads = num_attention_heads
         self.dropout = dropout   
-        self.criterion = criterion
-        self.weight = weight
         self.device = None
 
     def config_or_path(self):
@@ -85,8 +81,6 @@ class Train(TrainAgain):
             # problem_type='single_label_classification',
 
             device=self.device,
-            crit_weight=self.weight,
-            criterion=self.criterion,
             # fix train-time vocab:                   
             vocab=self.parameters['vocab_hash'], 
             pretrained_path = self.pretrained_path

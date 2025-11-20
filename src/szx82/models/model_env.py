@@ -1,9 +1,10 @@
 from torch import nn
+from transformers import BertConfig
 
 class MODEL(nn.Module):
     FILE_PREFIX = 'Out'
     def __init__(self,
-                model_factory,
+                BertModel,
                 config_or_model,
                 shell=None,
                 args=None):
@@ -11,31 +12,25 @@ class MODEL(nn.Module):
         super().__init__()
 
         self.shell = shell
-        model = model_factory(config_or_model, args)
-        self.model = model.to(model.config.device)
-        self.set_criterion(self.model.config.crit_weight)    
+        model = self.model_factory(BertModel, config_or_model, args)
+        self.model = model.to(model.config.device) 
+
+    def model_factory(self, BertModel, config_or_path, args=None):
+        if isinstance(config_or_path, BertConfig):
+            return BertModel(config_or_path)
+
+        path, config_diff = config_or_path
+        config = BertConfig.from_pretrained(
+            pretrained_model_name_or_path=path)
+        for k, v in config_diff.items():
+            setattr(config, k, v)
+        model = BertModel.from_pretrained(
+                pretrained_model_name_or_path=path, config=config)
+        return model
 
     def forward(self, batch):
         loss = None # = model_out.loss
         return loss 
-    
-    def set_criterion(self, weight):
-        raise NotImplemented()
-    
-    def set_weight(self, weight):
-        if not weight:
-            return
-        if not hasattr(self.model.config, 'crit_weight'):
-            return
-        try:
-            if self.model.config.crit_weight:
-                weight =  self.model.config.crit_weight * weight
-            
-            self.set_criterion(weight)
-
-        except Exception as ex:
-            print('Cannot change criterion weight:\n' + str(ex))
-            return None 
         
     def cumulate(self, current):
         cc = {}

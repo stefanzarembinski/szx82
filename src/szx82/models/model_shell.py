@@ -100,7 +100,6 @@ class ModelShell:
         def print_progress(what, epoche, idx, dataloader):
             if train_loss0 and val_loss0:
                 _best = 'none' if best is None else f'{best:0.2f}'
-
                 print(
                     '\r',
                     f'{what};',
@@ -111,7 +110,15 @@ class ModelShell:
                     f'ep:{epoche};',
                     f'batch:{idx}/{len(dataloader)};',
                     '      ',
-                    end='') 
+                    end='')
+            else:
+                print(
+                    '\r',
+                    f'{what}; wait...',
+                    f'ep:{epoche};',
+                    f'batch:{idx}/{len(dataloader)};',
+                    '      ',
+                    end='')                 
 
         while True:
             epochs += 1

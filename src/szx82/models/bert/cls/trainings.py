@@ -3,14 +3,14 @@ import pickle
 import torch
 torch.autograd.set_detect_anomaly(False)
 
-from szx82.models.bert.cls.train import Train, data
+from szx82.models.bert.re_train import ReTrain, data
 from szx82.models.bert.cls.model import MODEL
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu" 
 DATA_STORE = r'C:\Users\stefa\Documents\workspaces\szx81\EURUSD\data_store'
 DATA_FILE = r'data_tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;level-4;_cls.pkl'
 
-training_shell = Train(
+training_shell = ReTrain(
     file_name='bert',
     data_store=DATA_STORE,
     data=None,
