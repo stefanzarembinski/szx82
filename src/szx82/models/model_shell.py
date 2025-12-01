@@ -88,7 +88,6 @@ class ModelShell:
         
         best = None
         best_thd = 1e-4 
-        ncols=80
         train_acc = None
         val_acc = None
         epochs = 0
