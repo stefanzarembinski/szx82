@@ -18,7 +18,7 @@ class Dataset(Dataset):
         # print(self.data[index])
         return self.data[index]
     
-def data(data_or_file, device='cpu', dtype=torch.long):
+def data(data_or_file, device='cpu', dtype=torch.long, scale=1):
     if isinstance(data_or_file, str):
         with open(data_or_file, "rb") as f:
             data = pickle.load(f)
@@ -27,7 +27,8 @@ def data(data_or_file, device='cpu', dtype=torch.long):
     
     def process(data_set):
         data_set_ = []
-        for _ in data_set:
+        data_end = int(len(data_set) * scale)
+        for _ in data_set[:data_end]:
 
             input_ = {}
             for k, v in _['input'].items():
@@ -49,8 +50,7 @@ class ReTrain:
             data_store,
             data,
             model,         
-            data_split={'train_val': 0.75, 'val_test': 0.25},
-            batch_size=16,
+            batch_size=256,
             pretrained_path=None,
             config_diff={},
             device = None,
@@ -63,7 +63,6 @@ class ReTrain:
         self.pretrained_path = pretrained_path
         self.config_diff = config_diff
         self.data = data        
-        self.data_split = data_split
         self.batch_size = batch_size
         self.device = device
         self.lr = lr
@@ -84,8 +83,11 @@ class ReTrain:
         if name_prep is not None:
             self.file_name += '_' + name_prep
         
+        
         train_dataset = Dataset(self.data['train_data'])
+        assert len(train_dataset) > 0
         val_dataset = Dataset(self.data['val_data'])
+        assert len(val_dataset) > 0
         self.parameters = self.data['parameters']
 
         print(f'''
@@ -135,3 +137,5 @@ def main():
 # python -m szx82.transformer.bert.train
 if __name__ == "__main__":
      main()
+
+# sum(current_cumulated['nsp_eq']) / sum(current_cumulated['nsp_count']) - 0.5

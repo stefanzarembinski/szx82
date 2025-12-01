@@ -18,7 +18,8 @@ class MODEL(nn.Module):
     def model_factory(self, BertModel, config_or_path, args=None):
         if isinstance(config_or_path, BertConfig):
             return BertModel(config_or_path)
-
+        if isinstance(config_or_path, str):
+            config_or_path = tuple((config_or_path, {'device': 'cpu'}))
         path, config_diff = config_or_path
         config = BertConfig.from_pretrained(
             pretrained_model_name_or_path=path)

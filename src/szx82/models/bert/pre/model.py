@@ -1,5 +1,7 @@
+import numpy as np
 import torch
 # https://huggingface.co/docs/transformers/v4.57.0/en/model_doc/bert#transformers.BertForPreTraining
+from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, MSELoss
 from transformers import BertForPreTraining, BertConfig
 
 from szx82.models.model_env import MODEL as ModelEnv
@@ -37,48 +39,98 @@ class MODEL(ModelEnv):
     def final_adj(self):
         pass
 
+    def loss(self, input, model_out, reduction='mean', ):
+        vocab_size = self.model.config.vocab_size
+        loss_fct = CrossEntropyLoss(reduction=reduction)
+        loss = None
+        if 'labels' in input:
+            labels = input['labels']
+            prediction_scores = model_out.prediction_logits
+            masked_lm_loss = loss_fct(
+                prediction_scores.view(-1, vocab_size), labels.view(-1))
+            loss = masked_lm_loss
+                 
+        if 'next_sentence_label' in input:
+            next_sentence_label = input['next_sentence_label']
+            seq_relationship_score = model_out.seq_relationship_logits
+            next_sentence_loss = loss_fct(
+                seq_relationship_score.view(-1, 2), 
+                next_sentence_label.view(-1))
+            if loss is None:
+                loss = next_sentence_loss
+            else:
+                loss += next_sentence_loss
+
+        return loss
+
     def forward(self, batch):
         model_out = self.model(
                 output_hidden_states=True, 
                 return_dict=True,
                 **batch['input']
             )
-        
         prediction_logits = model_out.prediction_logits
         seq_relationship_logits = model_out.seq_relationship_logits
 
         # Total loss as the sum of the masked language modeling loss and the 
         # next sequence prediction (classification) loss:
         loss = model_out.loss
- 
-        labels = batch['input']['labels']
-        masked_ids = (labels != -100).nonzero(as_tuple=True)
-        masked_lbs = labels[masked_ids]
-        pred = torch.topk(prediction_logits, k=1, dim=-1)[1].squeeze()
-        masked_pred = pred[masked_ids]
-        mlm_eq = sum(masked_lbs == masked_pred).item()
-        mlm_count = len(masked_lbs)        
+        if loss is None:
+            loss = self.loss(batch['input'], model_out=model_out)
+
+        mlm_count = None
+        masked_pred = None
+        mlm_eq = None
+        if 'labels' in batch['input']:
+            labels = batch['input']['labels']
+            masked_ids = (labels != -100).nonzero(as_tuple=True)
+            masked_lbs = labels[masked_ids]
+            mlm_count = len(masked_lbs)
+            pred = torch.topk(prediction_logits, k=1, dim=-1)[1].squeeze() 
+            masked_pred = pred[masked_ids]
+            mlm_eq = sum(masked_lbs == masked_pred).item()
         
         # batch result is collected for accuracy calculations
-        self.current = {
-            'loss': loss.cpu().detach().tolist(),
-            'nsp_eq': sum(
+        self.current = {'loss': loss.cpu().detach().tolist(),}
+        if seq_relationship_logits is not None:
+            self.current.update({
+                    'nsp_eq': sum(
                 torch.topk(seq_relationship_logits, k=1)[1] \
                     == batch['input']['next_sentence_label']).item(),
-            'nsp_count': len(batch['input']['next_sentence_label']),
+                    'nsp_count': len(batch['input']['next_sentence_label']),
+        })
+        if mlm_eq is not None:
+            self.current.update({
             'mlm_eq': mlm_eq,
             'mlm_count': mlm_count
-        }
-        # import pdb; pdb.set_trace()
+            })
         return loss
     
     def accuracy(self, current_cumulated):
-        nsp = sum(current_cumulated['nsp_eq']) \
-                        / sum(current_cumulated['nsp_count']) - 0.5
-        mlm = sum(current_cumulated['mlm_eq']) \
+        if 'nsp_eq' in current_cumulated:
+            nsp = sum(current_cumulated['nsp_eq']) \
+                        / sum(current_cumulated['nsp_count'])
+        else:
+            nsp = None
+        
+        if 'mlm_eq' in current_cumulated:
+            mlm = sum(current_cumulated['mlm_eq']) \
                                     / sum(current_cumulated['mlm_count'])
-        msg = f'nsp,mlm:{nsp:.2f},{mlm:.2f}'
-        return {
-            'acc': {'nsp': nsp, 'mlm': mlm}, 
-            'msg': msg, 
-            'accuracy': nsp + mlm}
+        else:
+            mlm = None
+        
+        if (nsp is not None) and (mlm is not None):
+            return {
+                'acc': {'nsp': nsp, 'mlm': mlm},  
+                'msg': f'nsp,mlm:{nsp:.2f},{mlm:.2f}', 
+                'accuracy': nsp + mlm}
+        if nsp is not None:
+            return {
+                'acc': {'nsp': nsp}, 
+                'msg': f'nsp:{nsp:.2f}', 
+                'accuracy': nsp}
+        if mlm is not None:
+            return {
+                'acc': {'mlm': mlm}, 
+                'msg': f'mlm:{mlm:.2f}', 
+                'accuracy': mlm}

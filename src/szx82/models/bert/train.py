@@ -1,12 +1,5 @@
-import os
-from os import path
-
-from torch.utils.data import DataLoader
-
 from szx82.models.bert.pre.model import Config
-from szx82.models.model_shell import ModelShell
-from szx82.models.project_shell import ProjectShell
-from szx82.models.bert.re_train import Dataset, ReTrain
+from szx82.models.bert.re_train import ReTrain
 
 class Train(ReTrain):
     def __init__(
@@ -14,21 +7,19 @@ class Train(ReTrain):
             file_name, 
             data_store, 
             data, 
-            model, 
-            data_split={'train_val': 0.75, 'val_test': 0.25}, 
-            batch_size=16,
+            model,  
+            batch_size=256,
             device = None,
-            hidden_size=128, # defaults to 768
-            intermediate_size=4 * 128, # 4 * hidden_size? # defaults to 3072
+            hidden_size=384, # defaults to 768
+            intermediate_size=4 * 1536, # 4 * hidden_size? # defaults to 3072
             num_hidden_layers=6, # defaults to 12
-            num_attention_heads=2, # defaults to 12            
-            dropout=0.5,
+            num_attention_heads=6, # defaults to 12            
+            dropout=0.3,
             lr=0.0004, 
             stop_thd=0.1,
-            
             ):
 
-        super().__init__(file_name, data_store, data, model, data_split, batch_size, None, {}, device, lr, stop_thd)
+        super().__init__(file_name, data_store, data, model, batch_size, None, {}, device, lr, stop_thd)
 
         self.hidden_size = hidden_size
         self.intermediate_size = intermediate_size
@@ -37,7 +28,7 @@ class Train(ReTrain):
         self.dropout = dropout   
         self.device = None
 
-    def config_or_path(self):
+    def config_or_path(self):   
         config = Config(
             vocab_size=self.parameters['vocab_size'],
             hidden_size=self.hidden_size, # Dimensionality of the encoder
