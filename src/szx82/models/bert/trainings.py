@@ -56,6 +56,7 @@ def trainer():
     fi 2 sep 2 39pf/m  1nF na 20mm 100nF
     """
 
+    """
     training_shell. model = PRE.MODEL
     training_shell.data = data(path.join(
             DATA_STORE,'data_tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;level-4;_pres.pkl'), DEVICE, scale=0.3)
@@ -67,7 +68,9 @@ def trainer():
     training_shell.dropuot = 0.1 # default is 0.1
     training_shell.stop_thd=0.1
     training_shell.init(DEVICE, name_prep='pred3', force=False )
-    training_shell.train()    
+    training_shell.train()
+# training; loss trn,val:0.52,0.55; best:0.82; train:nsp,mlm:0.65,0.22; val.:nsp,mlm:0.62,0.20; ep:34; batch:762/844;
+    """
 
 def main():
     trainer()

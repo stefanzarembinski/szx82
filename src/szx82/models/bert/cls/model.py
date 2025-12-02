@@ -17,9 +17,6 @@ class MODEL(ModelEnv):
         # to create a `Model` object
         super().__init__(
             BertForSequenceClassification, config_or_path, shell)
-    
-    def set_criterion(self, weight):
-        pass
 
     def final_adj(self):
         pass
@@ -34,7 +31,7 @@ class MODEL(ModelEnv):
         logits = model_out.logits 
         loss = model_out.loss
         # import pdb; pdb.set_trace()
-        
+         
         self.current = {
             'loss': loss.cpu().detach().tolist(),
             'pred': torch.topk(

@@ -1,3 +1,4 @@
+import os
 from torch import nn
 from transformers import BertConfig
 
@@ -21,6 +22,8 @@ class MODEL(nn.Module):
         if isinstance(config_or_path, str):
             config_or_path = tuple((config_or_path, {'device': 'cpu'}))
         path, config_diff = config_or_path
+        assert os.path.exists(path), f'wrong model path: {path}'
+        
         config = BertConfig.from_pretrained(
             pretrained_model_name_or_path=path)
         for k, v in config_diff.items():

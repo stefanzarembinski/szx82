@@ -33,9 +33,6 @@ class MODEL(ModelEnv):
         # to create a `Model` object
         super().__init__(BertForPreTraining, config_or_path, shell)
 
-    def set_criterion(self, weight):
-        pass
-
     def final_adj(self):
         pass
 

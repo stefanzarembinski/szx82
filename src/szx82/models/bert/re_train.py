@@ -83,7 +83,6 @@ class ReTrain:
         if name_prep is not None:
             self.file_name += '_' + name_prep
         
-        
         train_dataset = Dataset(self.data['train_data'])
         assert len(train_dataset) > 0
         val_dataset = Dataset(self.data['val_data'])

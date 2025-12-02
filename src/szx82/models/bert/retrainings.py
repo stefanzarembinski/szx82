@@ -19,6 +19,7 @@ def trainer():
         model=None,
     )
 
+    """
     training_shell.model = PRE.MODEL
     training_shell.data = data(path.join(
             DATA_STORE,
@@ -31,12 +32,44 @@ def trainer():
     training_shell.stop_thd=0.1
     training_shell.init(DEVICE, name_prep='pre4', force=False)
     training_shell.train()
+
+# training; loss trn,val:0.60,0.63; best:0.95; train:nsp,mlm:0.75,0.20; val.:nsp,mlm:0.75,0.20; ep:6; batch:239/844;
+    """
+
+    """
+    training_shell.model = CLS.MODEL
+    training_shell.data = data(path.join(
+            DATA_STORE,
+            'data_tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;level-4;_clsd.pkl'), DEVICE, scale=0.5)
+    training_shell.pretrained_path = path.join(
+        DATA_STORE, 
+        path.join(
+            'tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;level-4;/BERT_PRE_bert_pre4', 'BERT_PRE_bert_pre4_bst_.pt'))
+    training_shell.batch_size = 128
+    training_shell.stop_thd=0.1
+    training_shell.init(DEVICE, name_prep='cls4', force=False)
+    training_shell.train()
+    """
+
+    training_shell.model = CLS.MODEL
+    training_shell.data = data(path.join(
+            DATA_STORE,
+            'data_tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;level-4;_clsd.pkl'), DEVICE, scale=1)
+    training_shell.pretrained_path = path.join(
+        DATA_STORE, 
+        path.join(
+            'tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;level-4;/BERT_CLS_bert_cls4', 'BERT_CLS_bert_cls4_bst_.pt'))
+    training_shell.batch_size = 128
+    training_shell.stop_thd=0.1
+    training_shell.init(DEVICE, name_prep='cls4', force=False)
+    training_shell.train()
+
     
-trainer()
+    
 
 def main():
     trainer()
 
 # python -m szx82.models.bert.retrainings
 if __name__ == '__main__':
-    main()
+    main() 
