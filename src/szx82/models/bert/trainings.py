@@ -13,7 +13,6 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def trainer():
     training_shell = TRAIN(
-        file_name='bert',
         data_store=DATA_STORE,
         data=None,
         model=None,
@@ -38,6 +37,41 @@ def trainer():
    
     """
 
+#     training_shell. model = PRE.MODEL
+#     training_shell.data = data(path.join(
+#             DATA_STORE,'tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;style-narrow;_pref.pkl'), DEVICE, scale=0.3)
+#     training_shell.batch_size = 256
+#     training_shell.hidden_size = 384 # defaults to 768
+#     training_shell.intermediate_size = 1536 # 4 * hidden_size? # defaults to 3072
+#     training_shell.num_hidden_layers = 10 # defaults to 12
+#     training_shell.num_attention_heads = 4 # defaults to 12
+#     training_shell.dropuot = 0.1 # default is 0.1
+#     training_shell.stop_thd=0.1
+#     training_shell.init(DEVICE, name_prep='nar1', force=False )
+#     training_shell.train()
+# # training; loss trn,val:0.35,0.35; best:1.34; train:nsp,mlm:0.76,0.58; val.:nsp,mlm:0.75,0.59; ep:14; batch:381/422; 
+# # training; loss trn,val:0.35,0.34; best:1.35; train:nsp,mlm:0.75,0.59; val.:nsp,mlm:0.75,0.59; ep:17; batch:4/422;
+# # training; loss trn,val:0.35,0.34; best:1.35; train:nsp,mlm:0.76,0.59; val.:nsp,mlm:0.75,0.60; ep:18; batch:301/422;
+
+
+#     training_shell. model = PRE.MODEL
+#     training_shell.data = data(path.join(
+#             DATA_STORE,'data_8-16-16_tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;style-narrow;_pref.pkl'), DEVICE, scale=0.3)
+#     training_shell.batch_size = 256
+#     training_shell.hidden_size = 384 # defaults to 768
+#     training_shell.intermediate_size = 1536 # 4 * hidden_size? # defaults to 3072
+#     training_shell.num_hidden_layers = 10 # defaults to 12
+#     training_shell.num_attention_heads = 4 # defaults to 12
+#     training_shell.dropuot = 0.1 # default is 0.1
+#     training_shell.stop_thd=0.1
+#     training_shell.init(DEVICE, name_prep='nar1', force=False )
+#     training_shell.train()
+# # training; loss trn,val:0.51,0.47; best:1.11; train:nsp,mlm:0.71,0.33; val.:nsp,mlm:0.75,0.36; ep:3; batch:402/422;
+# # training; loss trn,val:0.45,0.44; best:1.13; train:nsp,mlm:0.75,0.37; val.:nsp,mlm:0.74,0.38; ep:4; batch:3/422; 
+# # training; loss trn,val:0.44,0.44; best:1.14; train:nsp,mlm:0.75,0.39; val.:nsp,mlm:0.74,0.40; ep:5; batch:13/422;
+# # training; loss trn,val:0.36,0.37; best:1.26; train:nsp,mlm:0.76,0.50; val.:nsp,mlm:0.75,0.50; ep:30; batch:2/422;
+
+
     """
     training_shell. model = PRE.MODEL
     training_shell.data = data(path.join(
@@ -52,7 +86,7 @@ def trainer():
     training_shell.init(DEVICE, name_prep='pred2', force=False )
     training_shell.train()
 
-# training; loss trn,val:0.51,0.53; best:0.95; train:nsp,mlm:0.76,0.20; val.:nsp,mlm:0.75,0.19; ep:24; batch:19/844;
+# training; loss trn,val:0.51,0.53; best:0.95; train:nsp,mlm:0.76,0.   20; val.:nsp,mlm:0.75,0.19; ep:24; batch:19/844;
     fi 2 sep 2 39pf/m  1nF na 20mm 100nF
     """
 
@@ -71,6 +105,20 @@ def trainer():
     training_shell.train()
 # training; loss trn,val:0.52,0.55; best:0.82; train:nsp,mlm:0.65,0.22; val.:nsp,mlm:0.62,0.20; ep:34; batch:762/844;
     """
+
+    training_shell.model = PRE.MODEL
+    training_shell.data = data(path.join(
+            DATA_STORE,'data_4-8-8_tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;style-narrow;_pre.pkl'), DEVICE)
+    training_shell.batch_size = 256
+    training_shell.hidden_size = 384 # defaults to 768
+    training_shell.intermediate_size = 1536 # 4 * hidden_size? # defaults to 3072
+    training_shell.num_hidden_layers = 10 # defaults to 12
+    training_shell.num_attention_heads = 4 # defaults to 12
+    training_shell.dropuot = 0.1 # default is 0.1
+    training_shell.stop_thd=0.1
+    training_shell.init(DEVICE, name_prep='pre', force=False)
+    training_shell.train()
+# training; loss trn,val:1.00,1.00; best:0.59; train:nsp,mlm:0.53,0.05; val.:nsp,mlm:0.54,0.05; ep:1; batch:299/704;
 
 def main():
     trainer()

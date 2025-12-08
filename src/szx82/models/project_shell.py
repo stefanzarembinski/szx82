@@ -4,7 +4,7 @@ import timeit
 from os import path, makedirs, listdir
 import time
 import numpy as np
-import pickle
+import json
 import zlib
 from matplotlib import pyplot as plt
 from scipy.optimize import curve_fit
@@ -29,11 +29,12 @@ class Stopper:
         return np.mean(self.ctr_value[-self.tail:]) > scale * self.threshold
 
 class ProjectShell:
+    MODEL_PT = 'model'
     def __init__(
             self, 
             model_shell,
             store_dir, 
-            file_name=None,
+            name_prep=None, 
             stop_thd=0.1,
             save=True):
 
@@ -43,10 +44,11 @@ class ProjectShell:
         if not self.can_save:
             print('\nPARAMETR "save" ma wartość "False"! ################\n')
         self.ok_run = False
-        self.file_name_first = file_name
-        self.store_dir = path.join(store_dir, self.file_name())
+        self.name_prep = name_prep
+        self.store_dir = path.join(store_dir, self.project_name())
         self.start = timeit.default_timer()
         self.stopper = Stopper(stop_thd)
+        self.project_file = 'args.json'
 
     def print_result(self):
         pass # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -95,37 +97,38 @@ class ProjectShell:
         self.plot_training()
 
         return True
-
-    def file_name(self):
-        if self.file_name_first is not None:
-            return self.ms.model_env.FILE_PREFIX + '_' + self.file_name_first
+ 
+    def project_name(self):
+        if self.name_prep is not None:
+            return self.ms.model_env.FILE_PREFIX \
+                + ('_' + self.name_prep) if self.name_prep else ''
 
         file_name = f'{type(self.ms).__name__}_{zlib.adler32((self.__str__() + self.ms.__str__()) .encode())}'
-
+ 
         return self.ms.model_env.FILE_PREFIX + file_name
               
     def file_exists(self, force=False):
         self.ok_run = True
         print(f'''
 project dir: {path.normpath(self.store_dir)}
-project name: {self.file_name()}
+project name: {self.project_name()}
 ''')    
         if self.can_save:
             if path.exists(self.store_dir) and listdir(self.store_dir):
                 if not force:
                     yes_or_no = input(
-                        f'\r "Y" for overwriting existing file in dir {path.normpath(self.store_dir)}, anything else for aborting: the process: '
+                        f'\r "Y" for overwriting existing file in dir {path.normpath(self.store_dir)}, anything else to abort: '
                     )
                     if yes_or_no != "Y":
                         self.ok_run = False
             elif not path.exists(self.store_dir):
                 makedirs(self.store_dir, exist_ok=True)
 
-    def get_model_file(self, best=False):
+    def get_model_file(self, best=False): 
         if best:
             return path.join(
-            self.store_dir, self.file_name() + '_' + 'bst' + '_' + '.pt')
-        return  path.join(self.store_dir, self.file_name() + '.pt')
+            self.store_dir, self.MODEL_PT + '_' + 'bst' + '_' + '.pt')
+        return  path.join(self.store_dir, self.MODEL_PT + '.pt')
     
     def save_model(self, best=True, verbose=False): 
         file_path = self.get_model_file(best=best)
@@ -133,6 +136,11 @@ project name: {self.file_name()}
         if verbose:
             print(f'''model saved: {file_path}''')
 
+    def save_project(self, project_args):
+        with open(path.join(self.store_dir, self.project_file),"w") \
+                                                            as json_file:
+            json.dump(project_args, json_file, sort_keys=True, indent=4,)
+# 'C:\\Users\\stefa\\Documents\\workspaces\\szx81\\EURUSD\\data_store\\tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;level-4;\\BERT_CLS_bert_clsd'
 
 
     

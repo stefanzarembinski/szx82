@@ -4,7 +4,6 @@ from szx82.models.bert.re_train import ReTrain
 class Train(ReTrain):
     def __init__(
             self, 
-            file_name, 
             data_store, 
             data, 
             model,  
@@ -19,7 +18,7 @@ class Train(ReTrain):
             stop_thd=0.1,
             ):
 
-        super().__init__(file_name, data_store, data, model, batch_size, None, {}, device, lr, stop_thd)
+        super().__init__(data_store, data, model, batch_size, None, {}, device, lr, stop_thd)
 
         self.hidden_size = hidden_size
         self.intermediate_size = intermediate_size
@@ -30,7 +29,7 @@ class Train(ReTrain):
 
     def config_or_path(self):   
         config = Config(
-            vocab_size=self.parameters['vocab_size'],
+            vocab_size=self.data_param['vocab_size'],
             hidden_size=self.hidden_size, # Dimensionality of the encoder
             # layers and the pooler layer.
 
@@ -58,7 +57,7 @@ class Train(ReTrain):
             # (function or string) in the encoder and pooler.
             hidden_dropout_prob=self.dropout,
             attention_probs_dropout_prob=self.dropout,
-            max_position_embeddings=self.parameters['seq_len'],
+            max_position_embeddings=self.data_param['seq_len'],
             type_vocab_size=2, # The vocabulary size of the `token_type_ids`
             initializer_range=0.02,
             layer_norm_eps=1e-12,
@@ -73,7 +72,7 @@ class Train(ReTrain):
 
             device=self.device,
             # fix train-time vocab:                   
-            vocab=self.parameters['vocab_hash'], 
+            vocab=self.data_param['vocab_hash'], 
             pretrained_path = self.pretrained_path
         )
         return config

@@ -1,7 +1,6 @@
-import numpy as np
 import torch
 # https://huggingface.co/docs/transformers/v4.57.0/en/model_doc/bert#transformers.BertForPreTraining
-from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, MSELoss
+from torch.nn import CrossEntropyLoss
 from transformers import BertForPreTraining, BertConfig
 
 from szx82.models.model_env import MODEL as ModelEnv

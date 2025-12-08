@@ -90,7 +90,7 @@ class ModelShell:
         best_thd = 1e-4 
         train_acc = None
         val_acc = None
-        epochs = 0
+        epochs = -1
         first_epoch = True
 
         self.model_env.project_shell = self.project_shell
@@ -113,7 +113,7 @@ class ModelShell:
             else:
                 print(
                     '\r',
-                    f'{what}; wait...',
+                    f'{what}; get loss scale...',
                     f'ep:{epoche};',
                     f'batch:{idx}/{len(dataloader)};',
                     '      ',
@@ -172,15 +172,14 @@ class ModelShell:
                                         self.model_env.cumulate(val_current))
             self.train_history['val acc'].append(val_acc['acc'])
             
-            if best is None: 
-                best = val_acc['accuracy']
-            if (val_acc['accuracy'] / (abs(best) + 1e-12) - 1) \
-                                                    > best_thd:
+            if best is None \
+                or (val_acc['accuracy'] / (abs(best) + 1e-12) - 1) > best_thd:
+                
                 best = val_acc['accuracy']
                 if self.project_shell is not None:
                     self.project_shell.save_model(
                         best=True,
-                        verbose=False)
+                        verbose=False)                
                     
             # stop if `ctr_value` is clearly positive:
             if self.project_shell.stopper.stop(
