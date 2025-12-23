@@ -1,4 +1,5 @@
 import numpy as np
+import tempfile
 import torch
 from torch.optim import Adam
 
@@ -92,6 +93,8 @@ class ModelShell:
         val_acc = None
         epochs = -1
         first_epoch = True
+        model_saver = SaveBestModel(
+            self.model, self.project_shell.get_model_file(best=best))
 
         self.model_env.project_shell = self.project_shell
         self.model_env.final_adj()
@@ -160,7 +163,7 @@ class ModelShell:
                     loss = self.model_env(batch)
                     val_current.append(self.model_env.current)
                     val_running_loss += loss.item()           
-              
+                
             val_loss = val_running_loss / (idx + 1) \
                                                 / self.val_dataloader.batch_size
             if not val_loss0:
@@ -191,4 +194,47 @@ class ModelShell:
             first_epoch = False
 
     def save_model(self, file_path):
-        self.model_env.model.save_pretrained(file_path)
+        try:
+            self.model_env.model.save_pretrained(file_path)
+        except Exception as ex:
+            print(f'''Cannot save pretrained. Error message:
+{ex}
+''')
+            
+class SaveBestModel:
+    def __init__(self, model, ModelClass, file_path):
+        self.model = model
+        self.ModelClass = ModelClass 
+        self.file_path = file_path
+        self.best = None
+        self.best_thd = 1e-4 
+
+    def best_result(self, result):
+        if self.best is None \
+                or (result / (abs(self.best) + 1e-12) - 1) > self.best_thd:
+            self.save()
+            self.best = result
+
+    def save(self, model=None):
+        model = self.model_env.model if model is None else model
+        try:
+            model.save_pretrained(self.file_path)
+        except Exception as ex:
+            print(f'''Cannot save model in a predefined path:
+{self.file_path}. 
+Error message:
+{ex}
+''')
+        try:
+            temp_dir = tempfile.gettempdir()
+            model.save_pretrained(temp_dir)
+            print(f'''
+Best model saved in a temporary file:
+{temp_dir}
+''')
+        except Exception as ex:
+            print(f'''Cannot save model in a temporary path:
+{temp_dir}. 
+Error message:
+{ex}
+''')
