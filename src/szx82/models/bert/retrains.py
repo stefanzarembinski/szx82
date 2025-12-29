@@ -2,6 +2,11 @@ import os.path as path
 from os import path
 import torch
 
+print(f"`torch` default threads: {torch.get_num_threads()}")
+torch.set_num_threads(8) # Replace 8 with the number of physical cores
+torch.set_num_interop_threads(8)
+print(f"`torch` updated threads: {torch.get_num_threads()}")
+
 from szx82.models.bert.train import Train as TRAIN
 import szx82.models.bert.pre.model as PRE
 from szx82.models.bert.re_train import data, ReTrain as RE_TRAIN

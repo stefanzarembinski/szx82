@@ -1,6 +1,7 @@
 import numpy as np
 import tempfile
 import torch
+
 from torch.optim import Adam
 
 class ScheduledOptim:
@@ -93,8 +94,8 @@ class ModelShell:
         val_acc = None
         epochs = -1
         first_epoch = True
-        model_saver = SaveBestModel(
-            self.model, self.project_shell.get_model_file(best=best))
+        # model_saver = SaveBestModel(
+        #     self.model, self.project_shell.get_model_file(best=best))
 
         self.model_env.project_shell = self.project_shell
         self.model_env.final_adj()
