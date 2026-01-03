@@ -82,7 +82,8 @@ class MODEL(ModelEnv):
             masked_ids = (labels != -100).nonzero(as_tuple=True)
             masked_lbs = labels[masked_ids]
             mlm_count = len(masked_lbs)
-            pred = torch.topk(prediction_logits, k=1, dim=-1)[1].squeeze() 
+            pred = torch.topk(
+                prediction_logits, k=1, dim=-1)[1].squeeze(dim=-1) 
             masked_pred = pred[masked_ids]
             mlm_eq = sum(masked_lbs == masked_pred).item()
         
