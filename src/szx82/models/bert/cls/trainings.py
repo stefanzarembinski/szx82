@@ -44,9 +44,12 @@ def main():
     # training_shell.train(DEVICE, name_prep='ds200k')     
     
     # ##### testing DEVELOPMENT    
-    training_shell.data = data(path.join(
-        DATA_STORE, 
-        r'dev_tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;level-4;.pkl'))
+    training_shell.data = data(
+        path.join(
+            DATA_STORE, 
+            r'dev_tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;level-4;.pkl'),
+            scale=1,
+        )
     training_shell.batch_size = 64
     training_shell.train(DEVICE, name_prep='dev')
     

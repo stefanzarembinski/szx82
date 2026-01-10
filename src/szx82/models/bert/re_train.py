@@ -123,7 +123,7 @@ vocab hash: {self.data_param['vocab_hash']}''')
         self.project_shell = ProjectShell(
                 model_shell=model_shell,
                 store_dir=path.join(
-                    self.data_store, self.data_param['data_file_name']),
+                    self.data_store, self.data_param['out_file_name']),
                 name_prep=name_prep,
                 stop_thd=self.stop_thd
             )

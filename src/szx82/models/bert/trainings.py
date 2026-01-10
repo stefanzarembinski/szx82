@@ -75,13 +75,88 @@ def trainer():
 # # training; loss trn,val:0.15,0.34; best:1.57; train:nsp,mlm:0.97,0.75; val.:nsp,mlm:0.82,0.73; ep:111; batch:133/226;
 # # training; loss trn,val:0.15,0.35; best:1.57; train:nsp,mlm:0.97,0.76; val.:nsp,mlm:0.82,0.74; ep:123; batch:140/226;
 
-    training_shell. model = PRE.MODEL
-    prep='third1'
+#     training_shell. model = PRE.MODEL
+#     prep='third1'
 
-    training_shell.data = data(path.join(
+#     training_shell.data = data(path.join(
+#             DATA_STORE,
+#             'data_4-8-8-8-8_tokenizer_piecewise;mean_len-15;seg_size-10;idx_step-1;style-narrow;_(0,).pkl'
+#             ), DEVICE, scale=1)
+#     training_shell.batch_size = 128 #256
+#     training_shell.hidden_size = 256 # defaults to 768
+#     training_shell.intermediate_size = 1024 # 4 * hidden_size? # defaults to 3072
+#     training_shell.num_hidden_layers = 4 # defaults to 12
+#     training_shell.num_attention_heads = 4 # defaults to 12
+#     training_shell.dropuot = 0.3 # default is 0.1
+#     training_shell.stop_thd=0.1
+#     training_shell.init(DEVICE, name_prep=prep, force=False )
+#     training_shell.train() 
+
+# # train data size: 57848
+# # validation data size: 14476
+# # test data size: 72296
+
+# # training; loss trn,val:0.19,0.31; best:1.55; train:nsp,mlm:0.94,0.72; val.:nsp,mlm:0.83,0.72; ep:59; batch:143/452;
+# # validation; loss trn,val:0.15,0.35; best:1.57; train:nsp,mlm:0.97,0.76; val.:nsp,mlm:0.82,0.74; ep:109; batch:113/114;
+
+#     training_shell. model = PRE.MODEL
+#     prep='mod'
+
+#     training_shell.data = data(
+#         path.join(
+#             DATA_STORE,
+#             'data_piecewise;mean_len-15;seg_size-10;idx_step-1;_(0,).pkl'
+#             ), DEVICE, scale=0.5)
+#     training_shell.batch_size = 128 #256
+#     training_shell.hidden_size = 256 # defaults to 768
+#     training_shell.intermediate_size = 1024 # 4 * hidden_size? # defaults to 3072
+#     training_shell.num_hidden_layers = 4 # defaults to 12
+#     training_shell.num_attention_heads = 4 # defaults to 12
+#     training_shell.dropuot = 0.3 # default is 0.1
+#     training_shell.stop_thd=0.1
+#     training_shell.init(DEVICE, name_prep=prep, force=False )
+#     training_shell.train()
+
+# # train data size: 60032
+# # validation data size: 15008
+# # test data size: 75040
+
+# # training; loss trn,val:0.26,0.37; best:1.28; train:nsp,mlm:0.76,0.71; val.:nsp,mlm:0.54,0.72; ep:97; batch:236/469;
+
+#     training_shell. model = PRE.MODEL
+#     prep='mod'
+
+#     training_shell.data = data(
+#         path.join(
+#             DATA_STORE,
+#             '(0,),aligned-r_piecewise;mean_len-15;seg_size-10;idx_step-1;.pkl'
+#             ), DEVICE, scale=0.5)
+#     training_shell.batch_size = 128 #256
+#     training_shell.hidden_size = 256 # defaults to 768
+#     training_shell.intermediate_size = 1024 # 4 * hidden_size? # defaults to 3072
+#     training_shell.num_hidden_layers = 4 # defaults to 12
+#     training_shell.num_attention_heads = 4 # defaults to 12
+#     training_shell.dropuot = 0.3 # default is 0.1
+#     training_shell.stop_thd=0.1
+#     training_shell.init(DEVICE, name_prep=prep, force=False )
+#     training_shell.train()
+
+# # train data size: 60004
+# # validation data size: 15008
+# # test data size: 75012
+
+# #  training; loss trn,val:0.22,0.32; best:1.46; train:nsp,mlm:0.89,0.71; val.:nsp,mlm:0.75,0.71; ep:81; batch:82/469;
+# # training; loss trn,val:0.21,0.34; best:1.47; train:nsp,mlm:0.90,0.71; val.:nsp,mlm:0.75,0.71; ep:89; batch:103/469;
+# # training; loss trn,val:0.21,0.34; best:1.47; train:nsp,mlm:0.90,0.71; val.:nsp,mlm:0.75,0.72; ep:92; batch:45/469;
+
+    training_shell. model = PRE.MODEL
+    prep='mod'
+
+    training_shell.data = data(
+        path.join(
             DATA_STORE,
-            'data_4-8-8-8-8_tokenizer_piecewise;mean_len-15;seg_size-10;idx_step-1;style-narrow;_(0,).pkl'
-            ), DEVICE, scale=1)
+            '(0,),aligned-l_piecewise;mean_len-15;seg_size-10;idx_step-1;.pkl'
+            ), DEVICE, scale=0.5)
     training_shell.batch_size = 128 #256
     training_shell.hidden_size = 256 # defaults to 768
     training_shell.intermediate_size = 1024 # 4 * hidden_size? # defaults to 3072
@@ -90,15 +165,9 @@ def trainer():
     training_shell.dropuot = 0.3 # default is 0.1
     training_shell.stop_thd=0.1
     training_shell.init(DEVICE, name_prep=prep, force=False )
-    training_shell.train() 
+    training_shell.train()
 
-# train data size: 57848
-# validation data size: 14476
-# test data size: 72296
-
-# training; loss trn,val:0.19,0.31; best:1.55; train:nsp,mlm:0.94,0.72; val.:nsp,mlm:0.83,0.72; ep:59; batch:143/452;
-# validation; loss trn,val:0.15,0.35; best:1.57; train:nsp,mlm:0.97,0.76; val.:nsp,mlm:0.82,0.74; ep:109; batch:113/114;
-
+ 
 def main():  
     trainer() 
 
