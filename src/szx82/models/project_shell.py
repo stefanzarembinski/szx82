@@ -137,10 +137,11 @@ project name: {self.project_name()}
             print(f'''model saved: {file_path}''')
 
     def save_project(self, project_args):
-        with open(path.join(self.store_dir, self.project_file),"w") \
+        with open(path.join(self.store_dir, self.project_file), "w") \
                                                             as json_file:
-            json.dump(project_args, json_file, sort_keys=True, indent=4,)
-# 'C:\\Users\\stefa\\Documents\\workspaces\\szx81\\EURUSD\\data_store\\tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;level-4;\\BERT_CLS_bert_clsd'
+            json.dump({k: repr(v) for k, v in project_args.items()}, 
+                      json_file, sort_keys=True, indent=4,)
+
 
 
     

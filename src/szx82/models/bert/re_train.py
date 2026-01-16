@@ -17,7 +17,7 @@ class Dataset(Dataset):
     def __getitem__(self, index):
         # print(self.data[index])
         return self.data[index]
-    
+# C:\\Users\\stefa\\Documents\\workspaces\\szx81\\EURUSD\\data_store\\(0,),aligned-l,straight_piecewise;mean_len-15;seg_size-10;idx_step-1;\\(0,),aligned-l,straight_piecewise;mean_len-15;seg_size-10;idx_step-1;.pkl
 def data(data_or_file, device='cpu', dtype=torch.long, scale=1):
     if isinstance(data_or_file, str):
         with open(data_or_file, "rb") as f:
@@ -98,8 +98,9 @@ class ReTrain:
 train data size: {len(train_dataset)}
 validation data size: {len(val_dataset)}
 test data size: {len(self.data['test_data'])}
+train-val overlap: {self.data_param['train_val_overlap']:1.1e}
 vocab hash: {self.data_param['vocab_hash']}''')
-
+        
         model_shell = ModelShell(
                 train_dataloader=DataLoader(
                                     train_dataset,
@@ -153,3 +154,26 @@ if __name__ == "__main__":
      main()
 
 # sum(current_cumulated['nsp_eq']) / sum(current_cumulated['nsp_count']) - 0.5
+
+'''
+{
+'data_store':       
+    'C:\\Users\\stefa\\Documents\\workspaces\\szx81\\EURUSD\\data_store', 
+'model': "<class 'szx82.models.bert.pre.model.MODEL'>", 
+'pretrained_path': None, 
+'data': {
+    'vocab_size': 41, 
+    'vocab_hash': 'ec05018401456653', 
+    'seq_len': 103, 
+    'num_labels': 8, 
+    'virtual_levels': [...], 
+    'out_file_name': '(0,),aligned-l,straight_piecewise;mean_len-15;seg_size-10;idx_step-1;', 
+    'forecast_file': 'forecast;profit_min-8.0;panic_threshold-2.0;data_window-30;', 
+    'data_style': {...}
+    }, 
+    'batch_size': 128, 
+    'lr': 0.0004
+}
+
+TypeError: keys must be str, int, float, bool or None, not tuple
+'''
