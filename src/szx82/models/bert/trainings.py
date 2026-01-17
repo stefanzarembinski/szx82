@@ -23,23 +23,23 @@ def trainer():
         model=None,
     )
 
-    training_shell. model = PRE.MODEL
-    prep='mod-05'
+    # training_shell. model = PRE.MODEL
+    # prep='mod-05'
 
-    training_shell.data = data(
-        path.join(
-            DATA_STORE,
-            'C:\\Users\\stefa\\Documents\\workspaces\\szx81\\EURUSD\\data_store\\(0,),aligned-l,straight_0-60_piecewise;mean_len-15;seg_size-10;idx_step-1;\\(0,),aligned-l,straight_0-60_piecewise;mean_len-15;seg_size-10;idx_step-1;.pkl'
-            ), DEVICE, scale=0.5)
-    training_shell.batch_size = 256 #256
-    training_shell.hidden_size = 256 # defaults to 768
-    training_shell.intermediate_size = 1024 # 4 * hidden_size? # defaults to 3072
-    training_shell.num_hidden_layers = 4 # defaults to 12
-    training_shell.num_attention_heads = 4 # defaults to 12
-    training_shell.dropuot = 0.5 # default is 0.1
-    training_shell.stop_thd=0.1 
-    training_shell.init(DEVICE, name_prep=prep, force=False )
-    training_shell.train()
+    # training_shell.data = data(
+    #     path.join(
+    #         DATA_STORE,
+    #         'C:\\Users\\stefa\\Documents\\workspaces\\szx81\\EURUSD\\data_store\\(0,),aligned-l,straight_0-60_piecewise;mean_len-15;seg_size-10;idx_step-1;\\(0,),aligned-l,straight_0-60_piecewise;mean_len-15;seg_size-10;idx_step-1;.pkl'
+    #         ), DEVICE, scale=0.5)
+    # training_shell.batch_size = 256 #256
+    # training_shell.hidden_size = 256 # defaults to 768
+    # training_shell.intermediate_size = 1024 # 4 * hidden_size? # defaults to 3072
+    # training_shell.num_hidden_layers = 4 # defaults to 12
+    # training_shell.num_attention_heads = 4 # defaults to 12
+    # training_shell.dropuot = 0.5 # default is 0.1
+    # training_shell.stop_thd=0.1 
+    # training_shell.init(DEVICE, name_prep=prep, force=False )
+    # training_shell.train()
  
 # train data size: 252000
 # validation data size: 63000 
@@ -62,6 +62,26 @@ def trainer():
 # training; loss trn,val:0.19,0.17; best:1.70; train:nsp,mlm:0.96,0.69; val.:nsp,mlm:0.97,0.73; ep:15; batch:159/985;
 # training; loss trn,val:0.16,0.14; best:1.75; train:nsp,mlm:0.98,0.73; val.:nsp,mlm:0.99,0.77; ep:25; batch:101/985;
 # training; loss trn,val:0.16,0.14; best:1.76; train:nsp,mlm:0.98,0.73; val.:nsp,mlm:0.98,0.77; ep:27; batch:861/985;
+# training; loss trn,val:0.16,0.14; best:1.76; train:nsp,mlm:0.98,0.74; val.:nsp,mlm:0.98,0.78; ep:29; batch:127/985;
+
+
+    training_shell. model = PRE.MODEL
+    prep=None
+
+    training_shell.data = data(
+        path.join(
+            DATA_STORE,
+            'C:\\Users\\stefa\\Documents\\workspaces\\szx81\\EURUSD\\data_store\\(7,),aligned-l,straight_0-60_piecewise;mean_len-15;seg_size-10;idx_step-1;\\(7,),aligned-l,straight_0-60_piecewise;mean_len-15;seg_size-10;idx_step-1;.pkl'
+            ), DEVICE, scale=0.5)
+    training_shell.batch_size = 256 #256
+    training_shell.hidden_size = 256 # defaults to 768
+    training_shell.intermediate_size = 1024 # 4 * hidden_size? # defaults to 3072
+    training_shell.num_hidden_layers = 4 # defaults to 12
+    training_shell.num_attention_heads = 4 # defaults to 12
+    training_shell.dropuot = 0.5 # default is 0.1
+    training_shell.stop_thd=0.1 
+    training_shell.init(DEVICE, name_prep=prep, force=False )
+    training_shell.train()
 
  
 def main():   
