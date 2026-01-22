@@ -15,9 +15,8 @@ class Dataset(Dataset):
         return len(self.data)
         
     def __getitem__(self, index):
-        # print(self.data[index])
         return self.data[index]
-# C:\\Users\\stefa\\Documents\\workspaces\\szx81\\EURUSD\\data_store\\(0,),aligned-l,straight_piecewise;mean_len-15;seg_size-10;idx_step-1;\\(0,),aligned-l,straight_piecewise;mean_len-15;seg_size-10;idx_step-1;.pkl
+    
 def data(data_or_file, device='cpu', dtype=torch.long, scale=1):
     if isinstance(data_or_file, str):
         with open(data_or_file, "rb") as f:
@@ -55,7 +54,10 @@ class ReTrain:
             device = None,
             lr=0.0004,
             stop_thd=0.1,
-            ):
+            ): 
+        
+        # self.args = locals()
+
         self.data_store = data_store
         self.model = model
         self.pretrained_path = pretrained_path

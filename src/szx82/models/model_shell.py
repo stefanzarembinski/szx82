@@ -89,6 +89,7 @@ class ModelShell:
         val_loss0 = None
         
         best = None
+        new_best = ''
         best_thd = 1e-4 
         train_acc = None
         val_acc = None
@@ -100,9 +101,9 @@ class ModelShell:
         self.model_env.project_shell = self.project_shell
         self.model_env.final_adj()
 
-        def print_progress(what, epoche, idx, dataloader):
+        def print_progress(what, epochs, idx, dataloader):
             if train_loss0 and val_loss0:
-                _best = 'none' if best is None else f'{best:0.2f}'
+                _best = 'none' if best is None else f'{new_best}{best:0.2f}'
                 print(
                     '\r',
                     f'{what};',
@@ -110,7 +111,7 @@ class ModelShell:
                     f'best:{_best};',
                     f'train:{train_acc["msg"]};',
                     f'val.:{val_acc["msg"]};',
-                    f'ep:{epoche};',
+                    f'ep:{epochs};',
                     f'batch:{idx}/{len(dataloader)};',
                     '      ',
                     end='')
@@ -118,7 +119,7 @@ class ModelShell:
                 print(
                     '\r',
                     f'{what}; get loss scale...',
-                    f'ep:{epoche};',
+                    f'ep:{epochs};',
                     f'batch:{idx}/{len(dataloader)};',
                     '      ',
                     end='')                 
@@ -176,14 +177,14 @@ class ModelShell:
                                         self.model_env.cumulate(val_current))
             self.train_history['val acc'].append(val_acc['acc'])
             
-            if best is None \
-                or (val_acc['accuracy'] / (abs(best) + 1e-12) - 1) > best_thd:
-                
+            if best is None or (val_acc['accuracy'] / (abs(best) + 1e-12) - 1) \
+                                                                    > best_thd:
                 best = val_acc['accuracy']
+                new_best = f'{epochs}:'
                 if self.project_shell is not None:
                     self.project_shell.save_model(
                         best=True,
-                        verbose=False)                
+                        verbose=False)             
                     
             # stop if `ctr_value` is clearly positive:
             if self.project_shell.stopper.stop(
