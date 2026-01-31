@@ -53,7 +53,7 @@ class ReTrain:
             config_diff={},
             device = None,
             lr=0.0004,
-            stop_thd=0.1,
+            stop_thd=0.015,
             ): 
         
         # self.args = locals()
@@ -100,7 +100,6 @@ class ReTrain:
 train data size: {len(train_dataset)}
 validation data size: {len(val_dataset)}
 test data size: {len(self.data['test_data'])}
-train-val overlap: {self.data_param['train_val_overlap']:1.1e}
 vocab hash: {self.data_param['vocab_hash']}''')
         
         model_shell = ModelShell(

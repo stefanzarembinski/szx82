@@ -23,55 +23,53 @@ def trainer():
         model=None,
     )
 
-#     training_shell.model = CLS.MODEL
-#     prep_orig = 'half - Copy'
-#     prep='half1'
 
-#     training_shell.data = data(path.join(
-#         DATA_STORE,
-#             'data_4-8-8_tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;style-narrow;_clsf.pkl'
-#             ), DEVICE, scale=1)
+#     training_shell.model = PRE.MODEL
+#     prep_orig = ''
+#     prep='26cont'
+
+#     training_shell.data = data(
+#         path.join(
+#             r'C:\Users\stefa\Documents\workspaces\szx81\EURUSD\data_store\sym1_(0,),aligned-l_0-300_piecewise;mean_len-15;seg_size-10;idx_step-1;\sym1_(0,),aligned-l_0-300_piecewise;mean_len-15;seg_size-10;idx_step-1;.pkl'
+#             ), 
+#         DEVICE, 
+#         scale=1
+#         )
 #     training_shell.pretrained_path = path.join(
-#         DATA_STORE, 
-#             '4-8-8_tokenizer_piecewise_short;mean_len-15;seg_size-10;idx_step-1;style-narrow;', 'BERT_PRE_' + prep_orig, 'model_bst_.pt')
-#     training_shell.batch_size = 256
-#     training_shell.stop_thd=0.3
+#         r'C:\Users\stefa\Documents\workspaces\szx81\EURUSD\data_store\sym1_(0,),aligned-l_0-300_piecewise;mean_len-15;seg_size-10;idx_step-1;\BERT_PRE_26-bis-bis',
+#         'model_bst_.pt'
+# )
+#     training_shell.batch_size = 128
+#     training_shell.stop_thd=0.02
 #     training_shell.init(DEVICE, name_prep=prep, force=False)
 #     training_shell.train()
-# # training; loss trn,val:1.00,1.00; best:0.16; train:acc:0.15; val.:acc:0.16; ep:1; batch:356/704; 
-# # training; loss trn,val:0.93,0.94; best:0.23; train:acc:0.22; val.:acc:0.23; ep:2; batch:91/704;
-# # training; loss trn,val:0.93,0.94; best:0.23; train:acc:0.22; val.:acc:0.23; ep:2; batch:687/704;
+
+# # train data size: 120000
+# # validation data size: 30000
+# # test data size: 50000
+# # training; loss trn,val:0.94,0.94; best:42:1.37; train:nsp,mlm:0.69,0.65; val.:nsp,mlm:0.69,0.68; ep:43; batch:844/938; 
 
 
-    training_shell.model = PRE.MODEL
-    prep_orig = 'mod'
-    prep=''
+    training_shell.model = CLS.MODEL
+    prep_orig = ''
+    prep='26'
 
     training_shell.data = data(
         path.join(
-            DATA_STORE,
-'(0,),aligned-l,straight_100000_piecewise;mean_len-15;seg_size-10;idx_step-1;',
-'(0,),aligned-l,straight_100000_piecewise;mean_len-15;seg_size-10;idx_step-1;.pkl'
+            r'C:\Users\stefa\Documents\workspaces\szx81\EURUSD\data_store\CLS__(0,),aligned-l_0-300_piecewise;mean_len-15;seg_size-10;idx_step-1;\CLS__(0,),aligned-l_0-300_piecewise;mean_len-15;seg_size-10;idx_step-1;.pkl'
             ), 
         DEVICE, 
         scale=1
         )
     training_shell.pretrained_path = path.join(
-            DATA_STORE,
-'(0,),aligned-l,straight_piecewise;mean_len-15;seg_size-10;idx_step-1;', 
-'BERT_PRE_' + prep_orig, 'model_bst_.pt')
+        r'C:\Users\stefa\Documents\workspaces\szx81\EURUSD\data_store\sym1_(0,),aligned-l_0-300_piecewise;mean_len-15;seg_size-10;idx_step-1;\BERT_PRE_26cont',
+        'model_bst_.pt'
+)
     training_shell.batch_size = 128
-    training_shell.stop_thd=0.1
+    training_shell.stop_thd=0.02
     training_shell.init(DEVICE, name_prep=prep, force=False)
     training_shell.train()
 
-# train data size: 60004
-# validation data size: 15008
-# test data size: 75012
-
-# training; loss trn,val:1.00,1.00; best:1.15; train:nsp,mlm:0.60,0.53; val.:nsp,mlm:0.59,0.56; ep:1; batch:21/469;
-# training; loss trn,val:0.44,0.40; best:1.41; train:nsp,mlm:0.76,0.63; val.:nsp,mlm:0.75,0.67; ep:2; batch:10/469;
-# training; loss trn,val:0.34,0.46; best:1.43; train:nsp,mlm:0.91,0.66; val.:nsp,mlm:0.75,0.68; ep:4; batch:378/469;
 
 
 def main():

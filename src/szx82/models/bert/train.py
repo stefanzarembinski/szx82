@@ -66,10 +66,6 @@ class Train(ReTrain):
             use_cache=True, 
             classifier_dropout=None,
 
-            # hidden_dim=self.hidden_size, # nie ma tego. hidden_size 
-            # num_labels=parameters.num_labels,
-            # problem_type='single_label_classification',
-
             device=self.device,
             # fix train-time vocab:                   
             vocab=self.data_param['vocab_hash'], 
@@ -77,9 +73,43 @@ class Train(ReTrain):
         )
         return config
 
-def main():
-    Train()
+def test():
+    from os import path
+    import torch
+    from szx82.models.bert.train import Train as TRAIN
+    import szx82.models.bert.pre.model as PRE
+    from szx82.models.bert.re_train import data
+    DATA_STORE = r'C:\Users\stefa\Documents\workspaces\szx81\EURUSD\data_store'
+    DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-# python -m szx82.transformer.bert.train
+    training_shell = TRAIN(
+        data_store=DATA_STORE,
+        data=None,
+        model=None,
+    )
+
+    training_shell.model = PRE.MODEL
+    prep='23test' 
+
+    training_shell.data = data(
+        path.join(
+            DATA_STORE,
+            r'C:\Users\stefa\Documents\workspaces\szx81\EURUSD\data_store\test_(0,),aligned-l_piecewise;mean_len-15;seg_size-10;idx_step-1;\test_(0,),aligned-l_piecewise;mean_len-15;seg_size-10;idx_step-1;.pkl'
+            ), DEVICE, scale=0.5)
+    training_shell.batch_size = 256 #256
+    training_shell.hidden_size = 192 # defaults to 768
+    training_shell.intermediate_size = 256 # 4 * hidden_size? # defaults to 3072
+    training_shell.num_hidden_layers = 3 # defaults to 12
+    training_shell.num_attention_heads = 3 # defaults to 12
+    training_shell.dropuot = 0.5 # default is 0.1
+    training_shell.stop_thd=0.01 # val_loss = 0.34; rain_loss = 0.32
+    training_shell.init(DEVICE, name_prep=prep, force=False)
+    training_shell.train()
+
+def main():
+    # Train()
+    test()
+
+# python -m szx82.models.bert.train
 if __name__ == "__main__":
      main()

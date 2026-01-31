@@ -11,7 +11,7 @@ from scipy.optimize import curve_fit
 
 class Stopper:
     def __init__(self, min_ep_count=20, timeout=60, 
-                 tail=20, threshold=0.2):
+                 tail=20, threshold=0.02 ):
         self.min_ep_count = min_ep_count
         self.timeout = timeout * 60
         self.tail = tail
@@ -19,14 +19,15 @@ class Stopper:
         self.start_time = time.time()
         self.ctr_value = []
     
-    def stop(self, ctr_value, scale=1):
-        # if len(self.ctr_value) > 3:
-        #     return True
+    def stop(
+            self, train_loss, val_loss, new_best):
         # return `True` if  `ctr_value` is positive
+        ctr_value = 1 - train_loss / val_loss
         self.ctr_value.append(ctr_value)
-        if len(self.ctr_value) < self.min_ep_count:
-            return False        
-        return np.mean(self.ctr_value[-self.tail:]) > scale * self.threshold
+        if (epochs := len(self.ctr_value)) < self.min_ep_count:
+            return False
+        no_changes = (1 - new_best / epochs) > 0.2
+        return (ctr_value > self.threshold) or no_changes
 
 class ProjectShell:
     MODEL_PT = 'model'
@@ -35,7 +36,7 @@ class ProjectShell:
             model_shell,
             store_dir, 
             name_prep=None, 
-            stop_thd=0.1,
+            stop_thd=0.02,
             save=True):
 
         self.ms = model_shell
@@ -47,7 +48,7 @@ class ProjectShell:
         self.name_prep = name_prep
         self.store_dir = path.join(store_dir, self.project_name())
         self.start = timeit.default_timer()
-        self.stopper = Stopper(stop_thd)
+        self.stopper = Stopper(threshold=stop_thd)
         self.project_file = 'args.json'
 
     def print_result(self):
@@ -83,7 +84,6 @@ class ProjectShell:
 
             plt.legend()
             plt.show()
-            time.sleep(5)
         except:
             print('ERROR in "plot_training"!')
 
@@ -95,8 +95,8 @@ class ProjectShell:
         print(
         f"Training Time: {timeit.default_timer() - self.start:.2f} s")        
         self.plot_training()
-
-        return True
+        time.sleep(10)
+        return True 
  
     def project_name(self):
         if self.name_prep is not None:

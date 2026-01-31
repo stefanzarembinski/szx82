@@ -1,4 +1,5 @@
 import numpy as np
+from numpy import array
 import tempfile
 import torch
 
@@ -103,7 +104,7 @@ class ModelShell:
 
         def print_progress(what, epochs, idx, dataloader):
             if train_loss0 and val_loss0:
-                _best = 'none' if best is None else f'{new_best}{best:0.2f}'
+                _best = 'none' if best is None else f'{new_best}:{best:0.2f}'
                 print(
                     '\r',
                     f'{what};',
@@ -130,7 +131,7 @@ class ModelShell:
             train_current = []
             val_current = []            
 
-            train_running_loss = 0 
+            train_running_loss = []
 
             for idx, batch in enumerate(self.train_dataloader):
                 print_progress('training', epochs, idx, self.train_dataloader)
@@ -138,14 +139,13 @@ class ModelShell:
                 self.optimizer.zero_grad()
                 loss = self.model_env(batch)
                 train_current.append(self.model_env.current)
-                train_running_loss += loss.item()
+                train_running_loss.append(loss.item())
 
                 if not first_epoch:
                     loss.mean().backward()
                     self.optimizer.step()                  
             
-            train_loss = train_running_loss / (idx + 1) \
-                                            / self.train_dataloader.batch_size
+            train_loss = array(train_running_loss).mean()
             if not train_loss0:
                 if not np.isnan(train_loss):
                     train_loss0 = train_loss
@@ -157,17 +157,16 @@ class ModelShell:
 
             self.model_env.model.eval()
             with torch.no_grad():
-                val_running_loss = 0               
+                val_running_loss = []               
 
                 for idx, batch in enumerate(self.val_dataloader):
                     print_progress('validation', epochs, idx, self.val_dataloader)
                     
                     loss = self.model_env(batch)
                     val_current.append(self.model_env.current)
-                    val_running_loss += loss.item()           
+                    val_running_loss.append(loss.item())           
                 
-            val_loss = val_running_loss / (idx + 1) \
-                                                / self.val_dataloader.batch_size
+            val_loss = array(val_running_loss).mean()
             if not val_loss0:
                 if not np.isnan(val_loss):
                     val_loss0 = val_loss
@@ -180,16 +179,16 @@ class ModelShell:
             if best is None or (val_acc['accuracy'] / (abs(best) + 1e-12) - 1) \
                                                                     > best_thd:
                 best = val_acc['accuracy']
-                new_best = f'{epochs}:'
+                new_best = epochs
                 if self.project_shell is not None:
                     self.project_shell.save_model(
                         best=True,
                         verbose=False)             
-                    
-            # stop if `ctr_value` is clearly positive:
+            
             if self.project_shell.stopper.stop(
-                # train loss is much smaller then val loss:
-                    val_loss / val_loss0 - train_loss / train_loss0):
+                    train_loss=train_loss, 
+                    val_loss=val_loss,
+                    new_best=new_best):
                 if self.project_shell.stop():
                     break
 
