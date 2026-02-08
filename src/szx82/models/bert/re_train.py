@@ -55,8 +55,6 @@ class ReTrain:
             lr=0.0004,
             stop_thd=0.015,
             ): 
-        
-        # self.args = locals()
 
         self.data_store = data_store
         self.model = model
@@ -82,7 +80,7 @@ class ReTrain:
     def config_or_path(self):
         self.config_diff.update(
             {
-            'num_labels': self.data_param['num_labels'],
+            'num_labels': self.data_param.num_labels,
             'device': self.device,
             })
         return (self.pretrained_path, self.config_diff)
@@ -94,13 +92,13 @@ class ReTrain:
         assert len(train_dataset) > 0
         val_dataset = Dataset(self.data['val_data'])
         assert len(val_dataset) > 0
-        self.data_param = self.data['parameters']
+        self.data_param = self.data['dto']
 
         print(f'''
 train data size: {len(train_dataset)}
 validation data size: {len(val_dataset)}
 test data size: {len(self.data['test_data'])}
-vocab hash: {self.data_param['vocab_hash']}''')
+vocab hash: {self.data_param.vocab_hash}''')
         
         model_shell = ModelShell(
                 train_dataloader=DataLoader(
@@ -125,7 +123,7 @@ vocab hash: {self.data_param['vocab_hash']}''')
         self.project_shell = ProjectShell(
                 model_shell=model_shell,
                 store_dir=path.join(
-                    self.data_store, self.data_param['out_file_name']),
+                    self.data_store, self.data_param.out_file_name),
                 name_prep=name_prep,
                 stop_thd=self.stop_thd
             )
@@ -137,9 +135,9 @@ vocab hash: {self.data_param['vocab_hash']}''')
         mpe = config.max_position_embeddings
         msg = f'''
 model.config.max_position_embeddings: {mpe}
-self.data.seq_len: {self.data['parameters']['seq_len']}
+self.data.seq_len: {self.data['dto'].seq_len}
 '''
-        assert mpe == self.data['parameters']['seq_len'], msg
+        assert mpe == self.data['dto'].seq_len, msg
 
         self.project_shell.file_exists(force=force)
         self.project_shell.save_project(self.args_dict())
