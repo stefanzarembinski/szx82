@@ -36,9 +36,9 @@ def data(data_or_file, device='cpu', dtype=torch.long, scale=1):
             data_set_.append({'input': input_, 'admin': _['admin']})
         return data_set_
     
-    data['train_data'] = process(data['train_data'])
-    data['val_data'] = process(data['val_data'])
-    data['test_data'] = process(data['test_data'])
+    data.train_data = process(data.train_data)
+    data.val_data = process(data.val_data)
+    data.test_data = process(data.test_data)
       
     return data
 
@@ -88,16 +88,16 @@ class ReTrain:
     def set_project_shell(self, device, name_prep=None):
         self.device = device
         
-        train_dataset = Dataset(self.data['train_data'])
+        train_dataset = Dataset(self.data.train_data)
         assert len(train_dataset) > 0
-        val_dataset = Dataset(self.data['val_data'])
+        val_dataset = Dataset(self.data.val_data)
         assert len(val_dataset) > 0
-        self.data_param = self.data['dto']
+        self.data_param = self.data
 
         print(f'''
 train data size: {len(train_dataset)}
 validation data size: {len(val_dataset)}
-test data size: {len(self.data['test_data'])}
+test data size: {len(self.data.test_data)}
 vocab hash: {self.data_param.vocab_hash}''')
         
         model_shell = ModelShell(
@@ -135,9 +135,9 @@ vocab hash: {self.data_param.vocab_hash}''')
         mpe = config.max_position_embeddings
         msg = f'''
 model.config.max_position_embeddings: {mpe}
-self.data.seq_len: {self.data['dto'].seq_len}
+self.data.seq_len: {self.data.seq_len}
 '''
-        assert mpe == self.data['dto'].seq_len, msg
+        assert mpe == self.data.seq_len, msg
 
         self.project_shell.file_exists(force=force)
         self.project_shell.save_project(self.args_dict())
