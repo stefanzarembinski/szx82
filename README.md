@@ -17,10 +17,3 @@ To uninstall:
 To install in editable mode:
 
     PS ... > szx82> pip install -e .
-
-### Set the storage directory of the project according to the forex instrument used
-
-    PS .... szx81> python -m szx81.config set C:\Users\stefa\Documents\workspaces\szx81\EURUSD
-    PS .... szx81> python -m szx81.config set C:\Users\stefa\Documents\workspaces\EURUSD-26.10.2024
-
--- for example
